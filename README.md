@@ -1,6 +1,7 @@
 <p align="center">
     <a href="https://github.com/langshen/spartan" target="_blank">
-        <img src="https://github.com/langshen/spartan/logo.png" alt="spartan" />
+        <img src="https://raw.githubusercontent.com/langshen/spartan/master/logo.png" width="100" height="100" align="middle" />
+        <span style="font-size:18px;">Spartan Framework</span>
     </a>
 </p>
 

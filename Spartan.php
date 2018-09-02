@@ -9,7 +9,7 @@ class Spt {
     public static $arrInstance = [];// 实例化对象
     public static $arrConfig = [];//站点实例的配置
     public static $arrLang = [];//语言包
-    private static $arrError = [];//错误信息
+    public static $arrError = [];//错误信息
 
     /**
      * 框架开始启动
@@ -21,6 +21,11 @@ class Spt {
         set_error_handler([__CLASS__,'appError']);//用户自定义的错误处理函数
         set_exception_handler([__CLASS__,'appException']);//用户自己的异常处理方法
         register_shutdown_function([__CLASS__,'appShutdown']);//脚本执行关闭
+        if (PHP_SAPI == 'cli'){
+            if (!isset($_arrConfig['APP_NAME']) || !$_arrConfig['APP_NAME'] ||!isset($_arrConfig['APP_ROOT']) || !$_arrConfig['APP_ROOT']){
+                die('You need to configure variable "APP_NAME" and "APP_ROOT" in cli mode.');
+            }
+        }
         $_arrConfig = array_merge(
             Array(
                 'APP_NAME'=>'Www',
@@ -46,7 +51,6 @@ class Spt {
         date_default_timezone_set($_arrConfig['TIME_ZONE']);//设置系统时区
         $_arrConfig['APP_PATH'] = APP_ROOT.APP_NAME.DS;
         self::$arrConfig = $_arrConfig;unset($_arrConfig);//全局化当前配置
-
         self::$arrConfig['DEBUG'] && self::createAppDir(APP_NAME); //检测并创建目录
         if (self::$arrConfig['IS_CLI']){
             self::loadApp();
@@ -75,6 +79,11 @@ class Spt {
             APP_ROOT.$strAppName.DS.'Common'.DS,
         );
         if (!self::$arrConfig['IS_CLI']){
+            $strDocumentDir = str_ireplace('/',DS,$_SERVER['DOCUMENT_ROOT']).DS;
+            $arrDir[] = dirname($strDocumentDir).DS.'attachroot';
+            $arrDir[] = dirname($strDocumentDir).DS.'extend';
+            $arrDir[] = $strDocumentDir.'adm';
+            $arrDir[] = $strDocumentDir.'static';
             $arrDir[] = APP_ROOT.'Runtime'.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Cache'.DS.$strAppName.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Log'.DS.$strAppName.DS;
@@ -86,6 +95,11 @@ class Spt {
         $bolCreate = false;
         foreach ($arrDir as $dir){
             !is_dir($dir) && ($bolCreate = true && mkdir($dir,0755,true));
+        }
+        if (!$bolCreate && self::$arrConfig['IS_CLI']){
+            if (!is_file(APP_ROOT.$strAppName.DS.'Controller'.DS.ucfirst(self::$arrConfig['CONTROLLER']).CLASS_EXT)){
+                $bolCreate = true;
+            }
         }
         $bolCreate && self::initAppConfig($strAppName);
     }
@@ -112,8 +126,9 @@ class Spt {
             $strFile = APP_ROOT.$strAppName.DS.'View'.DS.'Index'.DS.'index.html';
             !is_file($strFile) && file_put_contents($strFile,trim($strHtml,PHP_EOL));
         }
+
         //初始化配置文件
-        list($strBaseConfig,$strConfig,$strAppConfig,$strFun) = explode('{Config}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_config.tpl'));
+        list($strBaseConfig,$strConfig,$strAppConfig,$strFun,$strCommonFun) = explode('{Config}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_config.tpl'));
         $strFile = APP_ROOT.'Common'.DS.'BaseConfig.php';
         !is_file($strFile) && file_put_contents($strFile,trim($strBaseConfig,PHP_EOL));
         $strFile = APP_ROOT.'Common'.DS.'Config.php';
@@ -122,8 +137,10 @@ class Spt {
         !is_file($strFile) && file_put_contents($strFile,trim($strFun,PHP_EOL));
         $strFile = APP_ROOT.$strAppName.DS.'Common'.DS.'Config.php';
         !is_file($strFile) && file_put_contents($strFile,trim($strAppConfig,PHP_EOL));
+        $strFile = APP_ROOT.$strAppName.DS.'Common'.DS.'Functions.php';
+        !is_file($strFile) && file_put_contents($strFile,trim($strCommonFun,PHP_EOL));
         //初始化Model/Model目录
-        list($strTable,$strModel,$strCache,$strLog) = explode('{README}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_readme.tpl'));
+        list($strTable,$strModel,$strCache,$strLog,$strAttach,$strExtend,$strAdmin,$strStatic) = explode('{README}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_readme.tpl'));
         $strFile = APP_ROOT.'Table'.DS.'README.md';
         !is_file($strFile) && file_put_contents($strFile,trim($strTable,PHP_EOL));
         $strFile = APP_ROOT.'Model'.DS.'README.md';
@@ -132,6 +149,20 @@ class Spt {
         !is_file($strFile) && file_put_contents($strFile,trim($strCache,PHP_EOL));
         $strFile = APP_ROOT.'Runtime'.DS.'Log'.DS.'README.md';//当前项目
         !is_file($strFile) && file_put_contents($strFile,trim($strLog,PHP_EOL));
+        if (self::$arrConfig['IS_CLI']) {
+            $strFile = APP_ROOT.$strAppName.DS.'Model'.DS.'README.md';//当前项目下的Model
+            !is_file($strFile) && file_put_contents($strFile,trim($strModel,PHP_EOL));
+        }else{
+            $strDocumentDir = str_ireplace('/',DS,$_SERVER['DOCUMENT_ROOT']).DS;
+            $strFile = dirname($strDocumentDir).DS.'attachroot'.DS.'README.md';//附件
+            !is_file($strFile) && file_put_contents($strFile,trim($strAttach,PHP_EOL));
+            $strFile = dirname($strDocumentDir).DS.'extend'.DS.'README.md';//扩展
+            !is_file($strFile) && file_put_contents($strFile,trim($strExtend,PHP_EOL));
+            $strFile = $strDocumentDir.'adm'.DS.'README.md';//前台
+            !is_file($strFile) && file_put_contents($strFile,trim($strStatic,PHP_EOL));
+            $strFile = $strDocumentDir.'static'.DS.'README.md';//后台
+            !is_file($strFile) && file_put_contents($strFile,trim($strAdmin,PHP_EOL));
+        }
     }
 
     /**
@@ -390,20 +421,20 @@ class Spt {
 
     /**
      * Cli下显错误
-     * @param string $msg
+     * @param string $key
      * @param bool $end
      * @param string $value
      * @return mixed
      */
-    public static function console($msg='',$end = false,$value=''){
-        if ($msg && !$value){
-            $value = $msg;
-            $msg = '';
+    public static function console($key='',$value='',$end = false){
+        if ($key && !$value){
+            $value = $key;
+            $key = '';
         }
-        print_r("+++++++++++++++++{$msg}++++++++++++++++++++".PHP_EOL);
+        print_r("+++++++++++++++++{$key}++++++++++++++++++++".PHP_EOL);
         print_r($value);
         print_r(PHP_EOL);
-        print_r("+++++++++++++++++{$msg}++++++++++++++++++++".PHP_EOL);
+        print_r("+++++++++++++++++{$key}++++++++++++++++++++".PHP_EOL);
         if ($end){
             self::$arrConfig['SAVE_LOG'] && self::saveLog('console end','notice');
             exit(0);
@@ -443,7 +474,7 @@ class Spt {
      */
     private static function runServer(){
         !self::$arrConfig['IS_CLI'] && self::console('Service only run in cli model.',true);
-        self::$arrConfig['URL'] = isset($_SERVER['argv'][1])?$_SERVER['argv'][1]:'';//如果是命令行，定义传入的参数
+        self::$arrConfig['URL'] = isset($_SERVER['argv'][1])?$_SERVER['argv'][1]:'index/index';//如果是命令行，定义传入的参数
         (!isset(self::$arrConfig['CONTROLLER']) || !self::$arrConfig['CONTROLLER']) && self::$arrConfig['CONTROLLER'] = 'Main';
         (!isset(self::$arrConfig['MAIN_FUN']) || !self::$arrConfig['MAIN_FUN']) && self::$arrConfig['MAIN_FUN'] = 'runMain';
         $strClass = APP_NAME . '\\Controller\\'.ucfirst(self::$arrConfig['CONTROLLER']);//入口类

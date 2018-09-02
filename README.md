@@ -27,7 +27,7 @@
 
 ## 文档
 
-[**中文文档**](http://doc.qz98.net)
+[**中文文档（http://doc.qz98.net）**](http://doc.qz98.net)
 
 QQ 交流群1: 233349570
 

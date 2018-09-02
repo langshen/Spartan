@@ -1,16 +1,22 @@
 <?php
 namespace {App_NAME}\Controller;
-use Spartan\Lib\WebServer;
+use Spartan\Lib\Console;
 
-class {CONTROLLER} extends WebServer{
+/**
+ * 入口主类，多个CLI服务，可以使用多个入口
+ * Class {CONTROLLER}
+ * @package {App_NAME}\Controller
+ */
+class {CONTROLLER} extends Console{
 
+    /**
+     * 入口函数，方便和WEb一样的URL模式，可用如下调用：
+     * php index.php member/login
+     * getUrl可以得到传入的参数，上面例子中"member/login"就是URL，和WEB一样。     *
+     */
     public function {MAIN_FUN}(){
-        $arrUrl = array_values(array_filter(explode('/',URL_PATH)));
-        if (!$arrUrl){
-            \Spt::console('+++++++++++++++++++++++++++++++++++++');
-            \Spt::console('please input RPC is name,eg : /test.');
-            \Spt::console('+++++++++++++++++++++++++++++++++++++',true);
-        }
+        $arrUrl = explode('/',config('URL'));
+        $this->console('Hello, this is {MAIN_FUN}.',$arrUrl,true);
 
     }
 }

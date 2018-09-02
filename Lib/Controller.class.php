@@ -18,6 +18,11 @@ class Controller{
         $this->view    = View::instance($_arrConfig);
         $this->view->init();
     }
+
+    /**
+     * 一个空操作，默认显示的404页面
+     * @return \Spartan\Driver\Response\View
+     */
     public function _empty(){
         return view('hello, 404啦~，'.config('URL').' 未能显示。');
     }

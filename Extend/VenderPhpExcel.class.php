@@ -28,8 +28,8 @@ class VenderPhpExcel{
         // Create new PHPExcel object
         $objPHPExcel = new \PHPExcel();
         // Set properties
-        $objPHPExcel->getProperties()->setCreator("langshen2008@qq.com")
-            ->setLastModifiedBy("langshen2008@qq.com")
+        $objPHPExcel->getProperties()->setCreator("spartan framework")
+            ->setLastModifiedBy("spartan framework")
             ->setTitle($fileName);
         $numToEng = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ,AK,AL,AM,AN,AO,AP,AQ,AR,AS,AT,AU,AV,AW,AX,AY,AZ";
         $numToEng = explode(',',$numToEng);

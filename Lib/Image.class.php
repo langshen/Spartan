@@ -19,7 +19,7 @@ class Image{
         (!isset($_arrConfig['height']) || !is_numeric($_arrConfig['height'])) && $_arrConfig['height'] = 28;
         (!isset($_arrConfig['length']) || !is_numeric($_arrConfig['length'])) && $_arrConfig['length'] = 4;
         (!isset($_arrConfig['mode']) || !is_numeric($_arrConfig['mode'])) && $_arrConfig['mode'] = 1;
-        (!isset($_arrConfig['verify_name']) || !$_arrConfig['verify_name']) && $_arrConfig['verify_name'] = 'verifyCode';
+        (!isset($_arrConfig['verify_name']) || !$_arrConfig['verify_name']) && $_arrConfig['verify_name'] = 'ver_code';
         (!isset($_arrConfig['driver']) || !$_arrConfig['driver']) && $_arrConfig['driver'] = 'Verify';
         (!isset($_arrConfig['type']) || !$_arrConfig['type']) && $_arrConfig['type'] = 'png';
         $_arrConfig['rand_text'] = $this->getText($_arrConfig['mode'],$_arrConfig['length']);

@@ -82,8 +82,8 @@ class Spt {
             $strDocumentDir = str_ireplace('/',DS,$_SERVER['DOCUMENT_ROOT']).DS;
             $arrDir[] = dirname($strDocumentDir).DS.'attachroot';
             $arrDir[] = dirname($strDocumentDir).DS.'extend';
-            $arrDir[] = $strDocumentDir.'adm';
-            $arrDir[] = $strDocumentDir.'static';
+            $arrDir[] = $strDocumentDir.'static'.DS.'admin';
+            $arrDir[] = $strDocumentDir.'static'.DS.'www';
             $arrDir[] = APP_ROOT.'Runtime'.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Cache'.DS.$strAppName.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Log'.DS.$strAppName.DS;
@@ -158,9 +158,9 @@ class Spt {
             !is_file($strFile) && file_put_contents($strFile,trim($strAttach,PHP_EOL));
             $strFile = dirname($strDocumentDir).DS.'extend'.DS.'README.md';//扩展
             !is_file($strFile) && file_put_contents($strFile,trim($strExtend,PHP_EOL));
-            $strFile = $strDocumentDir.'adm'.DS.'README.md';//前台
+            $strFile = $strDocumentDir.'static'.DS.'www'.DS.'README.md';//前台
             !is_file($strFile) && file_put_contents($strFile,trim($strStatic,PHP_EOL));
-            $strFile = $strDocumentDir.'static'.DS.'README.md';//后台
+            $strFile = $strDocumentDir.'static'.DS.'admin'.DS.'README.md';//后台
             !is_file($strFile) && file_put_contents($strFile,trim($strAdmin,PHP_EOL));
         }
     }
@@ -221,6 +221,9 @@ class Spt {
      * @return mixed|string
      */
     public static function getConfig($name = '',$default = null){
+        if ($name === '' && is_null($default)){
+            return self::$arrConfig;
+        }
         $arrName = explode('.',$name);
         $name = array_shift($arrName);
         $value = isset(self::$arrConfig[$name])?self::$arrConfig[$name]:null;
@@ -293,6 +296,7 @@ class Spt {
      * @return mixed
      */
     public static function getInstance($className,$config = []){
+        $className = trim($className,'\\');
         if (!isset(self::$arrInstance[$className])){
             self::$arrInstance[$className] = new $className($config);
         }

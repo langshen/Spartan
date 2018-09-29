@@ -247,7 +247,6 @@ class Session
         } else {
             $_SESSION[$name] = $value;
         }
-        function_exists('session_commit') && session_commit();
         $this->unlock();
         return $this;
     }
@@ -429,7 +428,6 @@ class Session
                 unset($_SESSION[$name]);
             }
         }
-        function_exists('session_commit') && session_commit();
         return true;
     }
 
@@ -448,7 +446,6 @@ class Session
         } else {
             $_SESSION = [];
         }
-        function_exists('session_commit') && session_commit();
         return true;
     }
 
@@ -513,7 +510,6 @@ class Session
     {
         if (!empty($_SESSION)) {
             $_SESSION = [];
-            function_exists('session_commit') && session_commit();
         }
         session_unset();
         session_destroy();

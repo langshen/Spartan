@@ -110,7 +110,6 @@ class Curl{
 	    if (isset($this->config['data_type']) && $this->config['data_type']){
 	        $dataType = $this->config['data_type'];
         }
-        var_dump($dataType);
 	    if (stripos($method,'.') > 0){
             list($method,$postType) = explode('.',$method);
         }else{
@@ -135,7 +134,7 @@ class Curl{
 		}
 		curl_setopt($this->curlHandle,CURLOPT_URL,$url);
 		$data = explode("\r\n\r\n",curl_exec($this->curlHandle));
-		var_dump($data);
+		//var_dump($data);
 		foreach ($data as $v){
             $this->headers = array_shift($data);
             if (stripos($this->headers,'HTTP/1.1 200 OK')===0 || ((stripos($this->headers,'Content-Type:')>0) &&

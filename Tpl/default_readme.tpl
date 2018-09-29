@@ -29,10 +29,9 @@ sql,err log
 该项目需要用到的第三方扩展，或框架并不存大的功能模块。
 
 {README}
-# wwwroot/static
-存放主站前台所需的静态资源文件。
-
-{README}
-# wwwroot/adm
+# wwwroot/static/admin
 存放管理后台所需的静态资源文件。
 
+{README}
+# wwwroot/static/www
+存放主站前台所需的静态资源文件。

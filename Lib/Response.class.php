@@ -103,7 +103,6 @@ class Response
      * 发送数据到客户端
      * @access public
      * @return void
-     * @throws \InvalidArgumentException
      */
     public function send()
     {

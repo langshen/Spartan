@@ -50,7 +50,7 @@ class Model {
      * 实例化一个Model类或指定名称的Model子类
      * @param $objClass \stdClass|string
      * @param $strType string
-     * @return mixed
+     * @return mixed|Model|StdCalss
      */
     public function getModel($objClass,$strType = 'Model'){
         if (is_object($objClass)){//是一个类
@@ -68,6 +68,7 @@ class Model {
                 }
             }
             if (!class_exists($strClassName)){
+                print_r($strClassName.' not exists.');
                 return $strClassName;
             }else{
                 return \Spt::getInstance($strClassName);
@@ -78,7 +79,7 @@ class Model {
     /**
      * 设置一个共用的寄存的数据池
      * @param array $arrData
-     * @return $this
+     * @return mixed|Model
      */
     public function setData($arrData = []){
         is_array($arrData) && $this->arrRequest = array_merge($this->arrRequest,$arrData);
@@ -99,6 +100,48 @@ class Model {
         return isset($this->arrRequest[$name])?$this->arrRequest[$name]:$default;
     }
 
+    /**
+     * 批量提取寄存变量
+     * @param string|mixed $arrName
+     * @return array
+     */
+    public function getFieldData($mixName){
+        $arrTempName = [];
+        if (is_array($mixName)){
+            $arrName = $mixName;
+            foreach ($arrName as $key=>$value){
+                $arrTempName[$key] = $this->getData($key,$value);
+            }
+        }else{
+            $arrName = explode(',',$mixName);
+            foreach ($arrName as $value){
+                $arrTempName[$value] = $this->getData($value,null);
+            }
+        }
+        unset($mixName);
+        return $arrTempName;
+    }
+
+    /**
+     * 按表单顺序，选择第一个有用的用户
+     * @param $mixValue
+     * @param null $backFun
+     * @return mixed|string
+     */
+    public function choose($mixValue,$backFun = null){
+        !is_array($mixValue) && $mixValue = [$mixValue];
+        $value = '';
+        foreach ($mixValue as $k=>$v){
+            if (is_callable($backFun)){
+                if ($backFun($v,$k) == true){
+                    $value = $v;break;
+                }
+            }else{
+                if (!$v){$value = $v;break;}
+            }
+        }
+        return $value;
+    }
     /**
      * 重置配置
      * @return $this

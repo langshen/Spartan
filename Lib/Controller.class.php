@@ -24,7 +24,7 @@ class Controller{
      * @return \Spartan\Driver\Response\View
      */
     public function _empty(){
-        return view('hello, 404啦~，'.config('URL').' 未能显示。');
+        return $this->display('hello, 404啦~，'.config('URL').' 未能显示。');
     }
 
     /**
@@ -97,8 +97,18 @@ class Controller{
      * @param string $default
      * @return mixed
      */
-    public function get($name = '',$default = ''){
+    protected function get($name = '',$default = ''){
         return isset($this->view->{$name})?$this->view->{$name}:$default;
+    }
+
+    /**
+     * 返回URL的第几个或全部
+     * @param int $number
+     * @param string $default
+     * @return string
+     */
+    protected function getUrl($number = 0,$default = ''){
+        return getUrl($number,$default);
     }
 
     /**
@@ -106,7 +116,7 @@ class Controller{
      * @access protected
      * @param  mixed $name  要显示的模板变量
      * @param  mixed $value 变量的值
-     * @return $this
+     * @return $this|mixed
      */
     protected function set($name, $value = '')
     {
@@ -122,7 +132,7 @@ class Controller{
      * @param  mixed     $data 返回的数据
      * @param  integer   $wait 跳转等待时间
      * @param  array     $header 发送的Header信息
-     * @return void
+     * @return mixed
      */
     protected function success($msg = '', $url = null, $data = '', $wait = 3, array $header = [])
     {
@@ -144,6 +154,7 @@ class Controller{
         $this->response->create($result, $type)
             ->header($header)
             ->options(['jump_template' => FRAME_PATH.'Tpl/dispatch_jump.tpl'])->send();
+        exit(0);
     }
 
     /**
@@ -154,7 +165,7 @@ class Controller{
      * @param  mixed     $data 返回的数据
      * @param  integer   $wait 跳转等待时间
      * @param  array     $header 发送的Header信息
-     * @return void
+     * @return mixed
      */
     protected function error($msg = '', $url = null, $data = '', $wait = 3, array $header = [])
     {
@@ -175,6 +186,7 @@ class Controller{
         $this->response->create($result, $type)
             ->header($header)
             ->options(['jump_template' => FRAME_PATH.'Tpl/dispatch_jump.tpl'])->send();
+        exit(0);
     }
 
     /**
@@ -184,15 +196,61 @@ class Controller{
      * @param  array|integer  $params 其它URL参数
      * @param  integer        $code http code
      * @param  array          $with 隐式传参
-     * @return void
+     * @return mixed
      */
     protected function redirect($url, $params = [], $code = 302, $with = [])
     {
-        if (is_integer($params)) {
-            $code   = $params;
-            $params = [];
-        }
-        $this->response->create($url, 'redirect', $code)->params($params)->with($with)->send();
+        redirect($url, $params, $code)->with($with)->send();
+    }
+
+    /**
+     * 输出一个下载请求
+     * @param string  $filename 要下载的文件
+     * @param string  $name 显示文件名
+     * @return mixed
+     */
+    protected function download($filename, $name = '')
+    {
+        download($filename, $name)->send();
+    }
+
+    /**
+     * 输出一个获取xml对象实例
+     * @param mixed   $data    返回的数据
+     * @param integer $code    状态码
+     * @param array   $header  头部
+     * @param array   $options 参数
+     * @return mixed
+     */
+    protected function xml($data = [], $code = 200, $header = [], $options = [])
+    {
+        download($data, $code, $header, $options)->send();
+    }
+
+    /**
+     * 输出一个Json对象实例
+     * @param mixed   $data 返回的数据
+     * @param integer $code 状态码
+     * @param array   $header 头部
+     * @param array   $options 参数
+     * @return mixed
+     */
+    protected function json($data = [], $code = 200, $header = [], $options = [])
+    {
+        return json($data,$code,$header,$options)->send();
+    }
+
+    /**
+     * 输出一个Jsonp对象实例
+     * @param mixed   $data    返回的数据
+     * @param integer $code    状态码
+     * @param array   $header 头部
+     * @param array   $options 参数
+     * @return mixed
+     */
+    protected function jsonp($data = [], $code = 200, $header = [], $options = [])
+    {
+        return jsonp($data,$code,$header,$options)->send();
     }
 
     /**
@@ -202,9 +260,9 @@ class Controller{
      * @param  integer   $code 返回的code
      * @param  mixed     $msg 提示信息
      * @param  array     $header 发送的Header信息
-     * @return void
+     * @return mixed
      */
-    protected function result($data, $code = 0, $msg = '', array $header = [])
+    protected function api($msg = '', $code = 0,$data = [], array $header = [])
     {
         $data = [
             'code' => $code,
@@ -212,6 +270,34 @@ class Controller{
             'time' => time(),
             'data' => $data,
         ];
-        $this->response->create($data, 'json')->header($header)->send();
+        return json($data,200,$header)->send();
+    }
+
+    /**
+     * 快捷输出API数据到客户端
+     * @param array|string $data 要返回的数据
+     * @return mixed
+     */
+    protected function toApi($data){
+        $intCode = 1;//默认为异常数据
+        $strMsg = '';
+        $arrData = [];
+        if (!is_array($data)){
+            $strMsg = $data;
+        }else{
+            if (isset($data[0])){
+                $strMsg = $data[0];
+                unset($data[0]);
+            }
+            if (isset($data[1])){
+                $intCode = $data[1];
+                unset($data[1]);
+            }
+            if (isset($data[2])){
+                $arrData = $data[2];
+                unset($data[2]);
+            }
+        }
+        return $this->api($strMsg,$intCode,$arrData);
     }
 }

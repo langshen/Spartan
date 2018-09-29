@@ -1,9 +1,9 @@
 <?php
-namespace Spartan\Driver\Sender;
+namespace Spartan\Extend\Sender;
 
 defined('APP_NAME') OR exit('404 Not Found');
 
-class Sms{
+class Sms implements SmsSender {
     public $arrMobile = Array();
     public $body = '';
     public $arrErrors = Array();
@@ -98,7 +98,7 @@ class Sms{
 		}
         foreach ($this->arrMobile as $key=>$mobile) {
             unset($this->arrMobile[$key]);
-		    if ($this->arrConfig['DEBUG']){
+		    if ($this->arrConfig['DEBUG'] == true){
                 $this->arrResult[$mobile] = Array(true,'测试发送成功');
                 return Array('测试发送成功',1);
             }

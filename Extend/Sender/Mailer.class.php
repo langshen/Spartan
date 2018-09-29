@@ -1,5 +1,5 @@
 <?php
-namespace Spartan\Driver\Sender;
+namespace Spartan\Extend\Sender;
 
 defined('APP_NAME') OR exit('404 Not Found');
 /**
@@ -16,7 +16,7 @@ defined('APP_NAME') OR exit('404 Not Found');
  * $mail->setMailInfo("test", "<b>test</b>"); 设置邮件主题、内容
  * $mail->sendMail(); 发送
  */
-class Mailer {
+class Mailer implements MailSender {
 	 /**
 	  * @var string 邮件传输代理用户名
 	  * @access private

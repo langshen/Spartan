@@ -1,26 +1,31 @@
 <?php
-namespace Spartan\Lib;
+namespace Spartan\Extend;
 
 defined('APP_NAME') OR exit('404 Not Found');
 
 class Sender {
-    private $arrConfig = [];
-    private $type = '';
-    private $arrInstance = [];
+    private $arrConfig = [];//自定义配置
+    private $type = '';//发送者区分，sms或email
+    private $arrInstance = [];//发送才实例
 	/**
 	 * 取得数据库类实例
-	 * @param array $arrConfig
-	 * @return \Spartan\Lib\Sender
+	 * @param array $_arrConfig
+	 * @return Sender
 	 */
-	public static function instance($arrConfig = []) {
-	    !isset($arrConfig['type']) && $arrConfig['type'] = 'sms';
-        $arrConfig['type'] != 'email' && $arrConfig['type'] = 'sms';
-		return \Spt::getInstance(__CLASS__,$arrConfig);
+	public static function instance($_arrConfig = []) {
+		return \Spt::getInstance(__CLASS__,$_arrConfig);
 	}
 
+    /**
+     * 初始当类
+     * Sender constructor.
+     * @param array $_arrConfig
+     */
 	public function __construct($_arrConfig = []){
         $this->arrConfig = $_arrConfig;
-        $this->{$this->arrConfig['type']}();
+        if (isset($_arrConfig['type']) && in_array($_arrConfig['type'],['sms','email'])){
+            $this->{$this->arrConfig['type']}($_arrConfig);
+        }
     }
 
     /**
@@ -30,10 +35,10 @@ class Sender {
      */
     public function sms($arrConfig = []){
         $this->type = 'sms';
-        $tmpConfig = C('SMS');
+        $tmpConfig = config('SMS');
         !is_array($tmpConfig) && $tmpConfig = [];
         $arrConfig = array_merge($this->arrConfig,$tmpConfig,$arrConfig);
-        $this->arrInstance['sms'] = \Spt::getInstance('Spartan\\Driver\\Sender\\Sms',$arrConfig);
+        $this->arrInstance['sms'] = \Spt::getInstance('Spartan\\Extend\\Sender\\'.$arrConfig['SENDER'],$arrConfig);
         return $this;
     }
 
@@ -44,14 +49,17 @@ class Sender {
      */
     public function email($arrConfig = []){
         $this->type = 'email';
-        $tmpConfig = C('EMAIL');
+        $tmpConfig = config('EMAIL');
         !is_array($tmpConfig) && $tmpConfig = [];
         $arrConfig = array_merge($this->arrConfig,$tmpConfig,$arrConfig);
-        $this->arrInstance['email'] = \Spt::getInstance('Spartan\\Driver\\Sender\\Mailer',$arrConfig);
+        $this->arrInstance['email'] = \Spt::getInstance('Spartan\\Extend\\Sender\\'.$arrConfig['SENDER'],$arrConfig);
         return $this;
     }
 
-
+    /**
+     * 一个发送动作
+     * @return mixed
+     */
     public function send(){
         if ($this->type == 'sms'){
             return $this->arrInstance[$this->type]->send();

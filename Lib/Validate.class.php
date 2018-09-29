@@ -173,15 +173,6 @@ class Validate
     protected $append = [];
 
     /**
-     * 实例化当前主模型类
-     * @param array $arrData '初始化的setData
-     * @return object | Validate
-     */
-    public static function instance(){
-        return \Spt::getInstance(__CLASS__);
-    }
-
-    /**
      * 架构函数
      * @access public
      * @param  array $rules 验证规则

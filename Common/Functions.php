@@ -14,8 +14,8 @@ function version(){
  */
 function config($name = '', $value = null)
 {
-    if (is_null($value) && is_string($name)) {
-        return \Spt::getConfig($name);
+    if ((substr($name,4)==='get.' || is_null($value)) && is_string($name)) {
+        return \Spt::getConfig($name,$value);
     }else{
         return \Spt::setConfig($name,$value);
     }
@@ -68,6 +68,7 @@ function session($name, $value = '', $prefix = null)
         return $clsSession->delete($name, $prefix);
     } else {// 设置
         return $clsSession->set($name, $value, $prefix);
+        //function_exists('session_commit') && session_commit();
     }
 }
 
@@ -313,13 +314,18 @@ function http($_arrConfig = [])
 }
 
 /**
- * 实例化Model管理器
+ * 快捷实例化Model管理器
+ * @param string $modelName 初始化的模型类，为空时为主类
  * @param array $arrData 初始化的数据
- * @return \Spartan\Lib\Model
+ * @return \Spartan\Lib\Model|mixed
  */
-function model($arrData = [])
+function model($modelName = '',$arrData = [])
 {
-    return \Spartan\Lib\Model::instance($arrData);
+    $clsModel = \Spartan\Lib\Model::instance($arrData);
+    if (!$modelName){
+        return $clsModel;//返回Model管理类
+    }
+    return $clsModel->getModel($modelName)->setData($arrData);//返回指定类
 }
 
 /**
@@ -334,6 +340,47 @@ function validate(array $rules = [], array $message = [], array $field = [])
     return \Spartan\Lib\Validate::make($rules,$message,$field);
 }
 
+/**
+ * @param $arrData
+ */
+function valid(&$arrData,&$errInfo = ''){
+    $rules = $message = $field = $data = [];
+    foreach ($arrData as $k=>$v){
+        if (stripos($k,'.')>0){
+            list($method,$k) = explode('.',$k);
+        }else{
+            $method = 'param';
+        }
+        if (!is_array($v) || $method == 'var'){
+            $data[$k] = $v;
+        }else{
+            $data[$k] = request()->$method($k);
+            $rules[$k] = isset($v[0])?$v[0]:'';
+            $message[$k] = isset($v[1])?$v[1]:'';
+        }
+    }
+    $clsValidate = validate($rules,$message);
+    $arrData = $data;//新的值
+    if (!$clsValidate->check($data)){
+        $errInfo = $clsValidate->getError();
+        return false;
+    }else{
+        return true;
+    }
+}
 
+/**
+ * @param $strEmail
+ * @return false|int
+ */
+function isEmail($strEmail){
+    return filter_var($strEmail, FILTER_VALIDATE_EMAIL)?true:false;
+}
 
-
+/**
+ * @param $strMobile
+ * @return false|int
+ */
+function isMobile($strMobile){
+    return preg_match('/^1[3-9][0-9]\d{8}$/', $strMobile);
+}

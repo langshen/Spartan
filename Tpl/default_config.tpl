@@ -25,11 +25,24 @@ return Array(
         'NAME'=>'redis',
         'PATH'=>'',
     ),
-    'EMAIL'=>Array(//邮件服务器配置
-        'SERVER'=>'',
+    'SMS'=>Array(//短信发送配置
+        'SENDER'=>'Sms',//短信发送类，默认使用“创世漫道”
+        'PROTOCOL'=>'http://',
+        'SERVER'=>'sdk.entinfo.cn',
         'USER_NAME'=>'',
         'PASS_WORD'=>'',
-        'PORT'=>25,
+        'PORT'=>'8060',
+        'INTERVAL'=>3,//间隔时间，秒
+        'CHARSET'=>'GBK',
+        'ACTION'=>'/webservice.asmx/mdSmsSend_u',//发送的动作，
+        'DEBUG'=>true,//测试发送是模拟发送
+    ),
+    'EMAIL'=>Array(//邮件服务器配置
+        'SENDER'=>'Mailer',//邮件发送类
+        'SERVER'=>'',//邮件STMP地址
+        'USER_NAME'=>'',//地址
+        'PASS_WORD'=>'',//密码
+        'PORT'=>25,//端口
         'FROM_EMAIL'=>'',//发件人EMAIL
         'FROM_NAME'=>'', //发件人名称
     ),
@@ -97,19 +110,19 @@ function uploadPath($path=''){
     return "../attachroot/".trim($path,'/');
 }
 function wwwUrl(){
-    return 'http://www.'.DOMAIN;
+    return 'http://www.'.request()->rootDomain();
 }
 function staticUrl(){
     return '/public/';
 }
 function attachUrl($path){
-    return 'http://attach.'.DOMAIN.'/'.trim($path,'/');;
+    return 'http://attach.'.request()->rootDomain().'/'.trim($path,'/');
 }
 function apiUrl(){
-    return 'http://api.'.DOMAIN;
+    return 'http://api.'.request()->rootDomain();
 }
 function adminUrl(){
-    return 'http://admin.'.DOMAIN;
+    return 'http://www.'.request()->rootDomain().'/admin';
 }
 {Config}
 <?php

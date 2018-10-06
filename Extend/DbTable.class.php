@@ -14,6 +14,7 @@ class DbTable {
         'save_path'=>APP_ROOT,//保存目录,以/结尾
         'name_space'=>'Table',//命名空间
     ];
+
     /**
      * @param array $arrConfig
      * @return DbTable
@@ -45,7 +46,7 @@ class DbTable {
             $value['status'] = is_object($clsTemp)?'已生成':'未建立';
         }
         unset($value);
-        return Array('success',1,$arrTable);
+        return Array('success',0,$arrTable);
     }
 
     /**
@@ -56,7 +57,7 @@ class DbTable {
     public function tableInfo($strTableName = ''){
         !$strTableName && $strTableName = strip_tags(request()->param('table',''));
         if (!$strTableName){
-            return Array('表名不能为空。',0);
+            return Array('表名不能为空。',1);
         }
         $clsDalTable = model()->getModel($strTableName,$this->config['name_space']);
         $arrCondition = $arrRequired = [];
@@ -68,7 +69,7 @@ class DbTable {
         }
         $arrInfo = db()->getFullFields($strTableName);
         if (!$arrInfo){
-            return Array('没有找到表的相关信息。',0);
+            return Array('没有找到表的相关信息。',1);
         }
         foreach ($arrInfo as $k=>&$v){
             $arrTempRequired = array_key_exists($k,$arrRequired)?$arrRequired[$k]:['','',['',''],'',''];
@@ -87,7 +88,7 @@ class DbTable {
             );
         }
         unset($v);
-        return Array('success',1,['name'=>$strTableName,'comment'=>$strComment,'fields'=>$arrInfo]);
+        return Array('success',0,['name'=>$strTableName,'comment'=>$strComment,'fields'=>$arrInfo]);
     }
 
     /**
@@ -107,30 +108,30 @@ class DbTable {
             'default'=>request()->param('default',[]),
         ),$arrData);
         if (!$arrData['condition']){
-            return Array('至少勾选一个查询条件。',0);
+            return Array('至少勾选一个查询条件。',1);
         }
         if ($arrData['condition'] && !is_array($arrData['condition'])){
-            return Array('查询条件condition应该是个数组。',0);
+            return Array('查询条件condition应该是个数组。',1);
         }
         if ($arrData['required'] && !is_array($arrData['required'])){
-            return Array('必填项required应该是个数组。',0);
+            return Array('必填项required应该是个数组。',1);
         }
         !$strTableName && $strTableName = strip_tags(request()->param('table_name',''));
         if (!$strTableName){
-            return Array('表名不能为空。',0);
+            return Array('表名不能为空。',1);
         }
         $arrFields = db()->getFullFields($strTableName);
         if (!$arrFields){
-            return Array('查询表字段失败。',0);
+            return Array('查询表字段失败。',1);
         }
         $arrTableInfo = db()->getTables($strTableName);
         if (!isset($arrTableInfo['data']) || !$arrTableInfo['data'] || !isset($arrTableInfo['data'][0])){
-            return Array('查询表的信息失败。',0);
+            return Array('查询表的信息失败。',1);
         }
         $arrTableInfo = $arrTableInfo['data'][0];
         $arrTable = db()->showCreateTable($strTableName);
         if (!$arrTable || !isset($arrTable[1])){
-            return Array('查询表SQL信息失败。',0);
+            return Array('查询表SQL信息失败。',1);
         }
         $arrTableInfo['sql'] = $arrTable[1];
         $arrTableInfo['prefix'] = $arrTable[2];
@@ -153,7 +154,7 @@ class DbTable {
             'strPrefix'=>$taleInfo['prefix'],
         );
         if (!$arrVars['strTableSql']){
-            return Array('解析表SQL错误',0);
+            return Array('解析表SQL错误',1);
         }
         $arrVars['strTableSql'] = 'CREATE "." TABLE `".$this->strPrefix."'.$taleInfo['name'].'` '.$arrVars['strTableSql'];
         if (stripos($arrVars['strTableName'],'_') > 0){
@@ -199,17 +200,132 @@ class DbTable {
         }
         $strFilePath = $this->config['save_path'].
             ucfirst(strtolower($this->config['name_space'])).
-            '\\'.$arrVars['strTablePath'];
+            DS.$arrVars['strTablePath'];
         if (!is_dir($strFilePath)){
-            if (mkdir($strFilePath,0755,true)){
-                return Array('目录不可写:'.$strFilePath,0);
+            if (@mkdir($strFilePath,0755,true)){
+                return Array('目录不可写:'.$strFilePath,1);
             }
         }
-        $strFilePath .= '\\'.$arrVars['strTableClass'].'.class.php';
-        if (!file_put_contents($strFilePath,$strContent)){
-            return Array('目录子目录写入失败:'.$strFilePath,0);
+        $strFilePath .= DS.$arrVars['strTableClass'].'.class.php';
+        if (!@file_put_contents($strFilePath,$strContent)){
+            return Array('目录子目录写入失败:'.$strFilePath,1);
         }
-        return Array('类：'.(str_ireplace($this->config['save_path'],'',$strFilePath)).'生成完成。',1);
+        return Array('模型：'.(str_ireplace($this->config['save_path'],'',$strFilePath)).'生成完成。',0);
     }
 
+    /**
+     * 已经存在的模型文件
+     * @param int $intLimit
+     * @param int $intPage
+     */
+    public function modelList($intLimit = 0,$intPage = 1){
+        $this->loadTableModel(APP_ROOT.$this->config['name_space'],$arrFiles);
+        $arrTableList = Db()->getTables();
+        if (!isset($arrTableList['data']) || !$arrTableList['data']){
+            $arrTableList = ['data'=>[],'total'=>0];
+        }
+        $arrTableKey = array_column($arrTableList['data'],'name');
+        $arrTableList['data'] = array_combine($arrTableKey,$arrTableList['data']);
+        $arrTable = [];
+        foreach ($arrFiles as $v){
+            $clsTemp = model()->getModel($v,$this->config['name_space']);
+            if (!is_object($clsTemp)){
+                $arrTable[] = Array(
+                    'name'=>str_replace('\\','/',$v),
+                    'comment'=>'模型失败',
+                    'rows'=>'模型失败',
+                    'create_time'=>'模型失败',
+                    'collation'=>'模型失败',
+                    'engine'=>'模型失败',
+                    'status'=>'模型失败',
+                );
+            }elseif (!isset($clsTemp->strTable)){
+                $arrTable[] = Array(
+                    'name'=>str_replace('\\','/',$v),
+                    'comment'=>'模型异常',
+                    'rows'=>'模型异常',
+                    'create_time'=>'模型异常',
+                    'collation'=>'模型异常',
+                    'engine'=>'模型异常',
+                    'status'=>'模型异常',
+                );
+            }elseif (!isset($arrTableList['data'][$clsTemp->strTable])){
+                $arrTable[] = Array(
+                    'name'=>$clsTemp->strTable,
+                    'comment'=>'未建立表',
+                    'rows'=>'未建立表',
+                    'create_time'=>'未建立表',
+                    'collation'=>'未建立表',
+                    'engine'=>'未建立表',
+                    'status'=>'未建立表',
+                );
+            }else{
+                $arrTableList['data'][$clsTemp->strTable]['status'] = '表模正常';
+                $arrTable[] = $arrTableList['data'][$clsTemp->strTable];
+            }
+        }
+        return Array('success',0,['data'=>$arrTable,'total'=>count($arrTable),'table_total'=>$arrTableList['total']]);
+    }
+
+    /**
+     * 根据模型文件建立数据表
+     * @return array
+     */
+    public function modelCreate(){
+        $strModelName = request()->param('table','');
+        if (!$strModelName || !is_scalar($strModelName)){
+            return Array('模型名称丢失。',1);
+        }
+        $arrConfig = array_filter(config('DB'));
+        if (!isset($arrConfig['NAME']) || !isset($arrConfig['USER'])){
+            return Array('请配置数据库连接。',1);
+        }
+        $clsModel = model()->getModel($strModelName,$this->config['name_space']);
+        if (!is_object($clsModel)){
+            return Array('模型类和文件不存在。',1);
+        }
+        if (!isset($clsModel->strTable)){
+            return Array('模型中的表名丢失。',1);
+        }
+        $arrFields = db()->getFullFields($clsModel->strTable);
+        if ($arrFields){
+            return Array('数据表已经存在，无需重新生成。',1);
+        }
+        if (!method_exists($clsModel,'sql')){
+            return Array($strModelName.'获取Sql失败。',1);
+        }
+        $result = db()->execute($clsModel->sql());
+        if ($result === false){
+            return Array($strModelName.'建立表失败，请检查权限。',1);
+        }
+        return Array($strModelName.'建立表成功。',0);
+    }
+    /**
+     * 找到Table下的所有已生成的模型
+     * @param $strDir
+     * @param array $arrFileName
+     */
+    private function loadTableModel($strDir,&$arrFileName = []){
+        $arrDir = is_array($strDir)?$strDir:explode(',',$strDir);
+        $intExtLen = strlen(CLASS_EXT);
+        $arrNextPath = [];
+        foreach($arrDir as $dir){
+            $arrCore = new \RecursiveDirectoryIterator(rtrim($dir,DS).DS);
+            foreach($arrCore as $objFile){
+                $strFile = $objFile->getPathname();
+                if ($objFile->isDir()){
+                    !in_array($objFile->getFilename(),['.','..']) && $arrNextPath[] = $strFile;
+                }else{
+                    if (substr($strFile,0 - $intExtLen) == CLASS_EXT){
+                        $strFile = trim(explode(APP_ROOT,strstr($strFile,'.',true))[1],DS.'.');
+                        if (explode(DS,$strFile)[0] != $this->config['name_space']){
+                            continue;
+                        }
+                        $arrFileName[] = $strFile;
+                    }
+                }
+            }
+        }
+        $arrNextPath && $this->loadTableModel($arrNextPath,$arrFileName);
+    }
 }

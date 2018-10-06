@@ -154,7 +154,7 @@ class Session
             session_id($_REQUEST[$config['var_session_id']]);
         } elseif (isset($config['id']) && $config['id'] && !empty($config['id'])) {
             session_id($config['id']);
-        } elseif (isset($config['php_id']) && isset($_REQUEST['php_id'])) {
+        } elseif (isset($_REQUEST['php_id']) && isset($_REQUEST['php_id'])) {
             session_id($_REQUEST['php_id']);
         }
         if (isset($config['name']) && $config['name']) {

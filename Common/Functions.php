@@ -329,6 +329,17 @@ function model($modelName = '',$arrData = [])
 }
 
 /**
+ * 快捷实例化Model管理器
+ * @param string $modelName 初始化的模型类，为空时为主类
+ * @param array $arrData 初始化的数据
+ * @return \Spartan\Driver\Model\Table|\Spartan\Lib\Model|mixed
+ */
+function dal($modelName = '',$arrData = [])
+{
+    $clsModel = \Spartan\Lib\Model::instance($arrData);
+    return $clsModel->getTable($modelName)->setData($arrData);//返回指定类
+}
+/**
  * 实例化验证器
  * @param array $rules 规则
  * @param array $message 提示信息

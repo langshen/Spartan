@@ -46,6 +46,27 @@ return Array(
         'FROM_EMAIL'=>'',//发件人EMAIL
         'FROM_NAME'=>'', //发件人名称
     ),
+    'WX_PAYMENT'=>Array(//微信支付配置
+        'APP_ID' => '',
+        'MCH_ID' => '',//商户号（必须配置，开户邮件中可查看）
+        'APP_KEY' =>'',//商户支付密钥，（必须配置，登录商户平台自行设置）
+        'APP_SECRET'=> '',//公众帐号secert（仅JSAPI支付的时候需要配置， 登录公众平台，进入开发者中心可设置），
+        'NOTIFY_URL'=> '',//异步通知url
+        'API_CLIENT_CERT'=>APP_ROOT.'Common'.DS.'Keys'.DS.'Wx'.DS.'apiclient_cert.pem',
+        'API_CLIENT_KEY'=>APP_ROOT.'Common'.DS.'Keys'.DS.'Wx'.DS.'apiclient_key.pem',
+    ),
+    'XCX_CONFIG'=>Array(//小程序配置
+        'APP_ID'=>'',
+        'APP_SECRET'=>'',
+        'TOKEN'=>'',
+        'ENCODING_AES_KEY'=>'',
+    ),
+    'MP_CONFIG'=>Array(//公众号配置
+        'APP_ID'=>'',
+        'APP_SECRET'=>'',
+        'TOKEN'=>'',
+        'ENCODING_AES_KEY'=>'',
+    )
 );
 {Config}
 <?php
@@ -82,8 +103,29 @@ $arrTemp =  Array(
             'OPEN'=>true,
             'NAME'=>'Admin',
         ),
+        'Xcx'=>Array(
+            'OPEN'=>true,
+            'NAME'=>'Xcx',
+        ),
+        'Mp'=>Array(
+            'OPEN'=>true,
+            'NAME'=>'Mp',
+        ),
+        'App'=>Array(
+            'OPEN'=>true,
+            'NAME'=>'App',
+        ),
+    ),
+    'ACCOUNT_TYPE'=>Array(//帐目类型，'调用别名'=>Array(ID号,名称);
+        'recharge'=>Array(1,'充值'),
+        'withdraw'=>Array(2,'提现'),
+        'reward'=>Array(3,'奖励'),
+        'vip'=>Array(4,'购买Vip'),
+        'agent_out'=>Array(5,'代理充值'),
+        'agent_in'=>Array(6,'代理充值'),
     ),
 );
+
 return array_merge($arrConfig,$arrTemp);
 {Config}
 <?php

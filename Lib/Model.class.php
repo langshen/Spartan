@@ -68,7 +68,6 @@ class Model {
                 }
             }
             if (!class_exists($strClassName)){
-                print_r($strClassName.' not exists.');
                 return $strClassName;
             }else{
                 return \Spt::getInstance($strClassName);
@@ -114,8 +113,9 @@ class Model {
             }
         }else{
             $arrName = explode(',',$mixName);
+            $arrName = array_filter($arrName);
             foreach ($arrName as $value){
-                $arrTempName[$value] = $this->getData($value,null);
+                $arrTempName[$value] = $this->getData($value,'');
             }
         }
         unset($mixName);
@@ -137,7 +137,7 @@ class Model {
                     $value = $v;break;
                 }
             }else{
-                if (!$v){$value = $v;break;}
+                if ($v){$value = $v;break;}
             }
         }
         return $value;
@@ -177,7 +177,24 @@ class Model {
         return !$name?$this->arrConfig:(isset($this->arrConfig[$name])?$this->arrConfig[$name]:'');
     }
 
-
+    /**
+     * 从一个Table Model提取符合FieldData的字段
+     * @param $clsTable mixed 表Model
+     * @return array
+     */
+    public function getTabelFieldsToFieldData($clsTable){
+        $arrFields = [];
+        foreach($clsTable->arrFields as $k=>$v){
+            if (in_array($v[0],['int','tinyint','smallint'])){
+                $arrFields[$k] = is_numeric($v[7])?$v[7]:0;
+            }elseif (in_array($v[0],['varchar','char','text'])){
+                $arrFields[$k] = $v[7]=='Empty String'?'':$v[7];
+            }else{
+                $arrFields[$k] = '';
+            }
+        }
+        return $arrFields;
+    }
     /**
      * 简单的错误记录器，使用SQL
      * //'level','class','info','err'

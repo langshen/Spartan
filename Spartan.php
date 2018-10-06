@@ -209,7 +209,16 @@ class Spt {
                 self::$arrConfig[$k] = isset(self::$arrConfig[$k])?array_merge(self::$arrConfig[$k],$v):$v;
             }
         }else{
-            self::$arrConfig[$name] = $value;
+            $arrName = explode('.',$name);
+            if (count($arrName)==2){
+                self::$arrConfig[$arrName[0]][$arrName[1]] = $value;
+            }elseif (count($arrName)==2){
+                self::$arrConfig[$arrName[0]][$arrName[1]][$arrName[2]] = $value;
+            }elseif (count($arrName)==3){
+                self::$arrConfig[$arrName[0]][$arrName[1]][$arrName[2]][$arrName[3]] = $value;
+            }else{
+                self::$arrConfig[$name] = $value;
+            }
         }
         return true;
     }
@@ -543,7 +552,7 @@ class Spt {
         $result = $objModule->{$strAction}();//执行对应控制器的方法，并把预想的原型方法传入。
         if ($result instanceof Spartan\Lib\Response){
             $result->send();
-        }else{
+        }elseif ($result){
             Spartan\Lib\Response::create($result)->send();
         }
     }

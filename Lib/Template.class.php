@@ -1023,7 +1023,7 @@ class Template
                             }
                         } else {
                             if (!empty($args[0])) {
-                                if ($args[0]==$this->config['default_filter'] && substr($name,-1,1) != ')'){
+                                if ($args[0]==$this->config['default_filter'] && substr($name,-1,1) != ')' && $name){
                                     $name = "$fun(isset($name)?$name:'')";
                                 }else{
                                     $name = "$fun($name)";
@@ -1114,7 +1114,6 @@ class Template
                     }
             }
         }
-
         return $parseStr;
     }
 

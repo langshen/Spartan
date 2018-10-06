@@ -200,7 +200,7 @@ class Controller{
      */
     protected function redirect($url, $params = [], $code = 302, $with = [])
     {
-        redirect($url, $params, $code)->with($with)->send();
+        return redirect($url, $params, $code)->with($with)->send();
     }
 
     /**
@@ -211,7 +211,7 @@ class Controller{
      */
     protected function download($filename, $name = '')
     {
-        download($filename, $name)->send();
+        return download($filename, $name)->send();
     }
 
     /**
@@ -224,7 +224,7 @@ class Controller{
      */
     protected function xml($data = [], $code = 200, $header = [], $options = [])
     {
-        download($data, $code, $header, $options)->send();
+        return download($data, $code, $header, $options)->send();
     }
 
     /**
@@ -278,26 +278,45 @@ class Controller{
      * @param array|string $data 要返回的数据
      * @return mixed
      */
-    protected function toApi($data){
-        $intCode = 1;//默认为异常数据
+    protected function toApi($minxData,$intCode = 1,$arrData = []){
         $strMsg = '';
-        $arrData = [];
-        if (!is_array($data)){
-            $strMsg = $data;
+        if (!is_array($minxData)){
+            $strMsg = $minxData;
         }else{
-            if (isset($data[0])){
-                $strMsg = $data[0];
-                unset($data[0]);
+            if (isset($minxData[0])){
+                $strMsg = $minxData[0];
             }
-            if (isset($data[1])){
-                $intCode = $data[1];
-                unset($data[1]);
+            if (isset($minxData[1])){
+                $intCode = $minxData[1];
             }
-            if (isset($data[2])){
-                $arrData = $data[2];
-                unset($data[2]);
+            if (isset($minxData[2])){
+                $arrData = $minxData[2];
             }
         }
+        unset($minxData);
         return $this->api($strMsg,$intCode,$arrData);
+    }
+
+    /**
+     * 批量提取寄存变量
+     * @param string|mixed $arrName
+     * @return array
+     */
+    public function getFieldData($mixName){
+        $arrTempName = [];
+        if (is_array($mixName)){
+            $arrName = $mixName;
+            foreach ($arrName as $key=>$value){
+                $arrTempName[$key] = request()->param($key,$value);
+            }
+        }else{
+            $arrName = explode(',',$mixName);
+            $arrName = array_filter($arrName);
+            foreach ($arrName as $value){
+                $arrTempName[$value] = request()->param($value,'');
+            }
+        }
+        unset($mixName);
+        return $arrTempName;
     }
 }

@@ -179,12 +179,12 @@ class Model {
 
     /**
      * 从一个Table Model提取符合FieldData的字段
-     * @param $clsTable mixed 表Model
+     * @param $arrFields mixed 表Model的所有字段
      * @return array
      */
-    public function getTabelFieldsToFieldData($clsTable){
+    public function getTabelFieldsToFieldData($arrFields){
         $arrFields = [];
-        foreach($clsTable->arrFields as $k=>$v){
+        foreach($arrFields as $k=>$v){
             if (in_array($v[0],['int','tinyint','smallint'])){
                 $arrFields[$k] = is_numeric($v[7])?$v[7]:0;
             }elseif (in_array($v[0],['varchar','char','text'])){

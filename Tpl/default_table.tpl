@@ -17,15 +17,9 @@ class {$strTableClass} extends \Spartan\Driver\Model\Table
 	//支持外露的查询条件
     public $arrCondition = Array(
 {$strCondition}    );
-    //判断规则
-    public $arrRule = Array(
-{$strCondition}    );
-    //信息提示
-    public $arrMessage = Array(
-{$strCondition}    );
     //添加时必的字段
-    public $arrRequired = Array(
-{$strRequired}    );
+    public $arrRequire = Array(
+{$strRequire}    );
     //所有的字段名,[类型,长度,小数,字段格式,主键,增值,否空,默认值,注释]
     public $arrFields = Array(
 {$strFields}    );

@@ -348,9 +348,19 @@ class Cx extends TagLib
                 $type = 'neq';
                 break;
         }
-        $type     = $this->parseCondition(' ' . $type . ' ');
-        $parseStr = '<?php if(isset('.$name.') && ' . $name . ' ' . $type . ' ' . $value . '): ?>' . $content . '<?php endif; ?>';
-
+        $type = $this->parseCondition(' ' . $type . ' ');
+        if (stripos($value,'||') > 0 || stripos($value,'&&') > 0){
+            $arrTemp = explode(stripos($value,'||') > 0?'||':'&&',trim($value,"'"));
+            $parseStr = '<?php if(';
+            foreach ($arrTemp as &$vv){
+                $vv = '(isset('.$name.') && '.$name.' '.$type.' \''.$vv.'\')';
+            }
+            unset($vv);
+            $parseStr .= implode($arrTemp,stripos($value,'||') > 0?' || ':' && ');
+            $parseStr .= '): ?>'.$content.'<?php endif; ?>';
+        }else{
+            $parseStr = '<?php if(isset('.$name.') && '.$name.' '.$type.' '.$value.'): ?>'.$content.'<?php endif; ?>';
+        }
         return $parseStr;
     }
 

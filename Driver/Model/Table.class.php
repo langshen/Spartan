@@ -7,6 +7,7 @@ class Table extends Model
     public $arrConfig = [
         'filter'=>[],//不自动select的字段
         'auto'=>true,//自动使用request内容做匹配
+        'array'=>false,//返回数组的格式
         'count'=>false,//select时，是否需要汇总
         'action'=>'update',//update时，指定的动作,update或insert
         'limit'=>20,//select时的默认记录数
@@ -17,7 +18,7 @@ class Table extends Model
     public $strAlias = 'a';//别名
     public $arrPrimary = [];//唯一主键 = ['主键名',主键值]
     public $arrCondition = [];//支持外露的查询条件
-    public $arrRequired = [];//添加时必的字段
+    public $arrRequire = [];//添加时必的字段
     public $arrFields = [];//所有的字段名,[类型,长度,小数,字段格式,主键,增值,否空,默认值,注释]
 
     /**
@@ -58,10 +59,12 @@ class Table extends Model
      * @return mixed
      */
     public function find($options = [],$math = ''){
+        $bolArray = $this->getConfig('array');
         if (!$math){
             $options = $this->parseCondition($options);
         }
-        return db()->find([$this->strTable,$this->strAlias],$options,$math);
+        $arrInfo = db()->find([$this->strTable,$this->strAlias],$options,$math);
+        return $bolArray?['success',$arrInfo===false?1:0,$arrInfo]:$arrInfo;
     }
 
 
@@ -81,61 +84,62 @@ class Table extends Model
             );
         }
         $arrResult['data'] = db()->select([$this->strTable,$this->strAlias],$options);
+        $bolArray = $this->getConfig('array');
         if ($this->getConfig('count') == true){
-            return $arrResult;
+            return $bolArray?['success',$arrResult['data']===false?1:0,$arrResult]:$arrResult;
         }else{
-            !$arrResult['data'] = [];
-            return $arrResult['data'];
+            return $bolArray?['success',$arrResult['data']===false?1:0,$arrResult['data']]:$arrResult['data'];
         }
     }
 
     /**
      * 删除记录。
      * @param array $options
-     * @param string $strMsg 提示信息
      * @return mixed
      */
-    public function delete($options = [],&$strMsg = ''){
+    public function delete($options = []){
+        $bolArray = $this->getConfig('array');
         if (isset($options['where']['id'])){
+            if (stripos($options['where']['id'],',')){
+                $options['where']['id'] = explode(',',$options['where']['id']);
+            }
             if (is_array($options['where']['id'])){//如果是个数据
                 if (isset($options['where']['id'][0]) && strtolower($options['where']['id'][0]) != 'in'){
                     $options['where']['id'] = Array('in',$options['where']['id']);//固定第一个为IN
                 }
                 if (!isset($options['where']['id'][1]) || !$options['where']['id'][1]){
-                    $strMsg = '删除条件为空。';
-                    return false;
+                    return $bolArray?['删除条件为空。',1]:false;
+                }
+                if (!is_array($options['where']['id'][1])){
+                    $options['where']['id'][1] = explode(',',$options['where']['id'][1]);
                 }
                 if (!is_numeric(implode('',$options['where']['id'][1]))){
-                    $strMsg = '删除ID数组不是数字。';
-                    return false;
+                    return $bolArray?['删除ID数组不是数字。',1]:false;
                 }
             }else{
                 if (!is_numeric($options['where']['id'])){
-                    $strMsg = '删除ID不是数字。';
-                    return false;
+                    return $bolArray?['删除ID不是数字。',1]:false;
                 }
             }
         }
         $result = db()->delete($this->strTable,$options);
-        $strMsg = $result?'删除成功':'删除失败';
-        return $result;
+        return $bolArray?[$result===false?'删除失败':'删除成功',$result===false?1:0,[]]:$result;
     }
 
     /**
      * @param array $options
      * @param array $arrData
-     * @param string $strMsg 提示信息
      * @return mixed
      */
-    public function update($arrData = [], $options = [],&$strMsg = ''){
+    public function update($arrData = [], $options = []){
+        $bolArray = $this->getConfig('array');
         $bolUpdate = false;
         //主键中的自增字段不允许在data里。
         $strPrimary = '';//自增主键名
         $arrPrimary = [];//主键数组
         foreach ($this->arrPrimary as $key=>$value){
             if (!array_key_exists($key,$this->arrFields)){
-                $strMsg = "主键：{$key}不在字段中";
-                return false;
+                return $bolArray?["主键：{$key}不在字段中",1,[]]:false;
             }
             //主键是自增
             if ($this->arrFields[$key][5] == 'true'){
@@ -179,12 +183,10 @@ class Table extends Model
             }
             $result = max(0,db()->insert($this->strTable,$arrData,$options));
             $arrPrimary[$strPrimary] = $result;
-            $strMsg = json_encode($arrPrimary,JSON_UNESCAPED_UNICODE);
         }else{
             $result = db()->update($this->strTable,$arrData,$options);
-            $strMsg = $result===false?'更新失败':'更新成功';
         }
-        return $result;
+        return $bolArray?[$result===false?'操作失败':'操作成功',$result===false?1:0,$arrPrimary]:$result;
     }
 
     /**
@@ -194,7 +196,9 @@ class Table extends Model
      * @return mixed
      */
     public function updateField($arrData = [],$options = []){
-        return db()->update($this->strTable,$arrData,$options);
+        $bolArray = $this->getConfig('array');
+        $result = db()->update($this->strTable,$arrData,$options);
+        return $bolArray?[$result===false?'操作失败':'操作成功',$result===false?1:0,[]]:$result;
     }
 
     /**

@@ -59,12 +59,21 @@ class DbTable {
         if (!$strTableName){
             return Array('表名不能为空。',1);
         }
+        $getFunc = function ($type,$long = 0){
+            if (in_array($type,['int','tinyint','smallint'])){
+                return 'number';
+            }elseif (in_array($type,['varchar','char','text'])){
+                return 'length'.($long>0?':1,'.$long:'');
+            }else{
+                return '';
+            }
+        };
         $clsDalTable = model()->getModel($strTableName,$this->config['name_space']);
-        $arrCondition = $arrRequired = [];
+        $arrCondition = $arrRequire = [];
         $strComment = '';
         if (is_object($clsDalTable)){
             $arrCondition = $clsDalTable->arrCondition;
-            $arrRequired = $clsDalTable->arrRequired;
+            $arrRequire = $clsDalTable->arrRequire;
             $strComment = $clsDalTable->strComment;
         }
         $arrInfo = db()->getFullFields($strTableName);
@@ -72,11 +81,24 @@ class DbTable {
             return Array('没有找到表的相关信息。',1);
         }
         foreach ($arrInfo as $k=>&$v){
-            $arrTempRequired = array_key_exists($k,$arrRequired)?$arrRequired[$k]:['','',['',''],'',''];
-            count($arrTempRequired) && $arrTempRequired[] = '';
+            $arrTempRequire = array_key_exists($k,$arrRequire)?$arrRequire[$k]:['','',''];
+            !isset($arrTempRequire[0]) && $arrTempRequire[0] = '';
+            !isset($arrTempRequire[1]) && $arrTempRequire[1] = '';
+            !isset($arrTempRequire[2]) && $arrTempRequire[2] = '';
+            if (isset($arrTempRequire[0]) && $arrTempRequire[0]){
+                if (mb_substr($arrTempRequire[0],0,8)=='require|'){//如果有内容，判断是否必填写
+                    $arrTempRequire[0] = ['require',mb_substr($arrTempRequire[0],8)];
+                }else{
+                    $arrTempRequire[0] = ['null',$arrTempRequire[0]];
+                }
+            }else{
+                $arrTempRequire[0] = ['',$getFunc($v[0],$v[1])];//如果为空，给出默认函数
+                !$arrTempRequire[1] && $arrTempRequire[1] = $v[8];//给出默认提示
+                !$arrTempRequire[2] && $arrTempRequire[2] = $arrTempRequire[0][1]=='number'?intval($v[7]):'';//给出默认值
+            }
             $v = Array(
                 'condition'=>array_key_exists($k,$arrCondition)?'1':'',
-                'required'=>$arrTempRequired,
+                'require'=>$arrTempRequire,
                 'name'=>$k,
                 'type'=>$v[0],
                 'long'=>$v[1] . ',' .$v[2],
@@ -84,7 +106,7 @@ class DbTable {
                 'pri'=>$v[4],
                 'null'=>$v[6],
                 'default'=>$v[7],
-                'comment'=>$v[8],
+                'comment'=>$v[8]
             );
         }
         unset($v);
@@ -100,10 +122,8 @@ class DbTable {
     public function tableCreate($strTableName = '',$arrData = []){
         $arrData = array_merge(Array(
             'condition'=>request()->param('condition',[]),
-            'required'=>request()->param('required',[]),
+            'require'=>request()->param('require',[]),
             'function'=>request()->param('function',[]),
-            'argv1'=>request()->param('argv1',[]),
-            'argv2'=>request()->param('argv2',[]),
             'tip'=>request()->param('tip',[]),
             'default'=>request()->param('default',[]),
         ),$arrData);
@@ -113,8 +133,8 @@ class DbTable {
         if ($arrData['condition'] && !is_array($arrData['condition'])){
             return Array('查询条件condition应该是个数组。',1);
         }
-        if ($arrData['required'] && !is_array($arrData['required'])){
-            return Array('必填项required应该是个数组。',1);
+        if ($arrData['require'] && !is_array($arrData['require'])){
+            return Array('必填项require应该是个数组。',1);
         }
         !$strTableName && $strTableName = strip_tags(request()->param('table_name',''));
         if (!$strTableName){
@@ -163,7 +183,7 @@ class DbTable {
             $arrVars['strTablePath'] = array_shift($arrTempClass);
             $arrVars['strTableClass'] = implode('',$arrTempClass);
         }
-        $arrVars['strPrimary'] = $arrVars['strFields'] = $arrVars['strCondition'] = $arrVars['strRequired'] = '';
+        $arrVars['strPrimary'] = $arrVars['strFields'] = $arrVars['strCondition'] = $arrVars['strRequire'] = '';
         foreach ($tableField as $key=>$value){
             $arrVars['strFields'] .= "\t\t'{$key}'=>['".implode("','",$value)."'],".PHP_EOL;
             $value[4]=='true' && $arrVars['strPrimary'] .= ",'{$key}'=>'{$value[0]}'";
@@ -179,19 +199,21 @@ class DbTable {
                 $arrVars['strCondition'] .= "\t\t'{$key}'=>['{$v[0]}',{$v[1]},'{$v[8]}'],".PHP_EOL;
             }
         }
-        //开始required判断
-        foreach ($arrConfig['required'] as $key=>$value){
+        //开始require判断
+        foreach ($arrConfig['require'] as $key=>$value){
             if ($value && array_key_exists($key,$tableField)){
                 $strFunction = isset($arrConfig['function'][$key])?$arrConfig['function'][$key]:'';
-                $strArgv1 = isset($arrConfig['argv1'][$key])?$arrConfig['argv1'][$key]:'';
-                $strArgv2 = isset($arrConfig['argv2'][$key])?$arrConfig['argv2'][$key]:'';
                 $strTip = isset($arrConfig['tip'][$key])?$arrConfig['tip'][$key]:'';
                 $strDefault = trim(isset($arrConfig['default'][$key])?$arrConfig['default'][$key]:'');
                 !$strTip && $v[8] = explode('#',$tableField[$key][8])[0];
-                $strDefault = strlen($strDefault)?",'{$strDefault}'":'';
-                $arrVars['strRequired'] .= "\t\t'{$key}'=>['{$value}','{$strFunction}',['{$strArgv1}','{$strArgv2}'],'{$strTip}'{$strDefault}],".PHP_EOL;
+                if ($value == 'require') {
+                    $value .= '|';
+                }else {
+                    $value = '';
+                }
+                $arrVars['strRequire'] .= "\t\t'{$key}'=>['{$value}{$strFunction}','{$strTip}','{$strDefault}'],".PHP_EOL;
             }
-        }
+        }unset($value);
         $strContent = file_get_contents(FRAME_PATH.'Tpl'.DS.'default_table.tpl');
         preg_match_all('/\{\$(.*?)\}/',$strContent,$arrValue);
         foreach ($arrValue[1] as $item) {

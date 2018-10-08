@@ -157,7 +157,7 @@ function wwwUrl(){
 function staticUrl(){
     return '/public/';
 }
-function attachUrl($path){
+function attachUrl($path=''){
     return 'http://attach.'.request()->rootDomain().'/'.trim($path,'/');
 }
 function apiUrl(){

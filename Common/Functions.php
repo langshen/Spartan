@@ -325,7 +325,11 @@ function model($modelName = '',$arrData = [])
     if (!$modelName){
         return $clsModel;//返回Model管理类
     }
-    return $clsModel->getModel($modelName)->setData($arrData);//返回指定类
+    $clsModel = $clsModel->getModel($modelName);
+    if (!is_object($clsModel)){
+        \Spt::halt("类名：{$modelName}不存在。");
+    }
+    return $clsModel->setData($arrData);//返回指定类
 }
 
 /**
@@ -337,7 +341,11 @@ function model($modelName = '',$arrData = [])
 function dal($modelName = '',$arrData = [])
 {
     $clsModel = \Spartan\Lib\Model::instance($arrData);
-    return $clsModel->getTable($modelName)->setData($arrData);//返回指定类
+    $clsModel = $clsModel->getTable($modelName);
+    if (!is_object($clsModel)){
+        \Spt::halt("表模型：{$modelName}不存在。");
+    }
+    return $clsModel->setData($arrData);//返回指定类
 }
 /**
  * 实例化验证器
@@ -368,6 +376,7 @@ function valid(&$arrData,&$errInfo = ''){
             $data[$k] = request()->$method($k);
             $rules[$k] = isset($v[0])?$v[0]:'';
             $message[$k] = isset($v[1])?$v[1]:'';
+            (isset($v[2]) && is_null($data[$k])) && $data[$k] = $v[2];
         }
     }
     $clsValidate = validate($rules,$message);

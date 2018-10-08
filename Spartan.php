@@ -523,7 +523,7 @@ class Spt {
             $strSubAppName = self::$arrConfig['SUB_APP_NAME'];
         }
         !preg_match('/^[A-Za-z_]([A-Za-z0-9_])*$/',$arrPath[0]) && $arrPath[0] = 'Index';//控制器不合法时设置为index
-        $strControl = $arrPath[0];//得到控制器
+        $strControl = ucfirst($arrPath[0]);//得到控制器
         $strAction = $arrPath[1];//得到方法
         self::$arrConfig['URL'] = implode('/',$arrPath);//定义全局使用的最终URL,除去子项目
         self::$arrConfig['SUB_APP_NAME'] = $strSubAppName;
@@ -538,7 +538,7 @@ class Spt {
         }
         self::$arrConfig['CONTROL'] = $strControl;//定义全局正在使用的最终控制器
         !is_object($objModule) && self::halt(//控制器 和 空控制都不存在，退出并提示
-            "[".ucfirst($arrPath[0])."]({$strModule}) Controller not existing.".
+            "[".$arrPath[0]."]({$strModule}) Controller not existing.".
             "[Empty]({$strEmptyModule}) Controller not existing."
         );
         if(!method_exists($objModule,$strAction)){//方法 和 空方法都不存在，退出并提示

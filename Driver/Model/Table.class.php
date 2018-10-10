@@ -22,6 +22,55 @@ class Table extends Model
     public $arrFields = [];//所有的字段名,[类型,长度,小数,字段格式,主键,增值,否空,默认值,注释]
 
     /**
+     * 自动的快捷操作
+     * @param bool $blo
+     * @return $this
+     */
+    public function Auto($blo = true){
+        $this->setConfig(['auto'=>$blo]);
+        return $this;
+    }
+
+    /**
+     * 返回数组的格式的快捷操作
+     * @param bool $blo
+     * @return $this
+     */
+    public function setArr($blo = true){
+        $this->setConfig(['array'=>$blo]);
+        return $this;
+    }
+
+    /**
+     * 是否需要汇总的快捷操作
+     * @param bool $blo
+     * @return $this
+     */
+    public function setCount($blo = true){
+        $this->setConfig(['count'=>$blo]);
+        return $this;
+    }
+
+    /**
+     * 指定的动作,update或insert
+     * @param bool $blo
+     * @return $this
+     */
+    public function Action($action = 'update'){
+        $this->setConfig(['action'=>$action]);
+        return $this;
+    }
+    /**
+     * select时的默认记录数
+     * @param int $limit
+     * @return $this
+     */
+    public function limit($limit = 20){
+        $this->setConfig(['limit'=>$limit]);
+        return $this;
+    }
+
+    /**
      * 返回一个表的可查询条件
      * @return array
      */

@@ -149,7 +149,7 @@ function attachPath($path=''){
     return "../attachroot/".trim($path,'/');
 }
 function uploadPath($path=''){
-    return "../attachroot/".trim($path,'/');
+    return attachPath($path);
 }
 function wwwUrl(){
     return 'http://www.'.request()->rootDomain();
@@ -158,7 +158,7 @@ function staticUrl(){
     return '/public/';
 }
 function attachUrl($path=''){
-    return 'http://attach.'.request()->rootDomain().'/'.trim($path,'/');
+    return 'http://www.'.request()->rootDomain().'/attach/'.trim($path,'/');
 }
 function apiUrl(){
     return 'http://api.'.request()->rootDomain();

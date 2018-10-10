@@ -64,6 +64,8 @@ class DbTable {
                 return 'number';
             }elseif (in_array($type,['varchar','char','text'])){
                 return 'length'.($long>0?':1,'.$long:'');
+            }elseif(in_array($type,['decimal'])){
+                return 'float';
             }else{
                 return '';
             }

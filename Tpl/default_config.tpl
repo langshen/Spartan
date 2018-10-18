@@ -121,8 +121,6 @@ $arrTemp =  Array(
         'withdraw'=>Array(2,'提现'),
         'reward'=>Array(3,'奖励'),
         'vip'=>Array(4,'购买Vip'),
-        'agent_out'=>Array(5,'代理充值'),
-        'agent_in'=>Array(6,'代理充值'),
     ),
 );
 

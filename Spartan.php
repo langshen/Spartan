@@ -518,10 +518,10 @@ class Spt {
         $arrSubApp = self::getConfig("SUB_APP.{$arrPath[0]}");//提取子项目列表
         if (isset($arrSubApp['OPEN']) && $arrSubApp['OPEN'] == true && array_shift($arrPath) == $arrSubApp['NAME']){
             $strSubAppName = $arrSubApp['NAME'];//当前存在的子项目
-            (!isset($arrPath[1]) || !$arrPath[1]) && $arrPath[1] = 'Index';//默认为index方法
         }else{
             $strSubAppName = self::$arrConfig['SUB_APP_NAME'];
         }
+        (!isset($arrPath[1]) || !$arrPath[1]) && $arrPath[1] = 'Index';//默认为index方法
         !preg_match('/^[A-Za-z_]([A-Za-z0-9_])*$/',$arrPath[0]) && $arrPath[0] = 'Index';//控制器不合法时设置为index
         $strControl = ucfirst($arrPath[0]);//得到控制器
         $strAction = $arrPath[1];//得到方法

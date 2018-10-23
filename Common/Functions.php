@@ -404,3 +404,51 @@ function isEmail($strEmail){
 function isMobile($strMobile){
     return preg_match('/^1[3-9][0-9]\d{8}$/', $strMobile);
 }
+
+/**
+ * 数字转大写
+ * @param $number
+ * @return mixed
+ */
+function toUpperNumber($number){
+    $cnynums = array("〇","一","二","三","四","五","六","七","八","九");
+    return str_replace(array_keys($cnynums),$cnynums,$number);
+}
+/**
+ * 金额转中文大写
+ * @param $money
+ * @return mixed
+ */
+function toChineseNumber($money){
+    $money = number_format(round($money,2),2,'.','');
+    $cnynums = array("零","壹","贰","叁","肆","伍","陆","柒","捌","玖");
+    $cnyunits = array("圆","角","分");
+    $cnygrees = array("拾","佰","仟","万","拾","佰","仟","亿");
+    list($int,$dec) = explode(".",$money,2);
+    $dec = array_filter(array($dec[1],$dec[0]));
+    $ret = array_merge($dec,array(implode("",cnyMapUnit(str_split($int),$cnygrees)),""));
+    $ret = implode("",array_reverse(cnyMapUnit($ret,$cnyunits)));
+    return str_replace(array_keys($cnynums),$cnynums,$ret);
+}
+
+/**
+ * 转换的数字顺序
+ * @param $list
+ * @param $units
+ * @return array
+ */
+function cnyMapUnit($list,$units) {
+    $ul = count($units);
+    $xs = array();
+    foreach (array_reverse($list) as $x) {
+        $l = count($xs);
+        if ($x != "0" || !($l % 4)){
+            $l = ($l-1) % $ul;
+            $n=($x=='0'?'':$x).(isset($units[$l])?$units[$l]:'');
+        }else{
+            $n = isset($xs[0][0]) && is_numeric($xs[0][0])?$x:'';
+        }
+        array_unshift($xs,$n);
+    }
+    return $xs;
+};

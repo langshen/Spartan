@@ -85,14 +85,14 @@ class Cx extends TagLib
 
         // 设置了输出数组长度
         if (0 != $offset || 'null' != $length) {
-            $parseStr .= '$__LIST__ = is_array(' . $name . ') ? array_slice(' . $name . ',' . $offset . ',' . $length . ', true) : ' . $name . '->slice(' . $offset . ',' . $length . ', true); ';
+            $parseStr .= '$__'.strtoupper($id).'_LIST__ = is_array(' . $name . ') ? array_slice(' . $name . ',' . $offset . ',' . $length . ', true) : ' . $name . '->slice(' . $offset . ',' . $length . ', true); ';
         } else {
-            $parseStr .= ' $__LIST__ = ' . $name . ';';
+            $parseStr .= ' $__'.strtoupper($id).'_LIST__ = ' . $name . ';';
         }
 
-        $parseStr .= 'if( count($__LIST__)==0 ) : echo "' . $empty . '" ;';
+        $parseStr .= 'if( count($__'.strtoupper($id).'_LIST__)==0 ) : echo "' . $empty . '" ;';
         $parseStr .= 'else: ';
-        $parseStr .= 'foreach($__LIST__ as $'.$id.'_key=>$' . $id . '): ';
+        $parseStr .= 'foreach($__'.strtoupper($id).'_LIST__ as $'.$id.'_key=>$' . $id . '): ';
         $parseStr .= '$mod = ($' . $key . ' % ' . $mod . ' );';
         $parseStr .= '++$' . $key . ';?>';
         $parseStr .= $content;

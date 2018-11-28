@@ -18,7 +18,10 @@
                     <thead>
                     <tr>
                         <th>表名称（共{$list.total}个表）</th>
-                        <th>表注释（共{$list.total}个表）</th>
+                        <th>表注释（共{$list.total}个表）
+                            <input type="text" id="key" value="{$Spt.GET.key}" placeholder="过滤表" style="border:#ccc solid 1px;border-radius: 2px;padding:2px 4px;" />
+                            <button class="layui-btn layui-btn-normal layui-btn-xs" onclick="search()">搜索</button>
+                        </th>
                         <th>表行数</th>
                         <th>建表时间</th>
                         <th>表编码</th>
@@ -43,6 +46,18 @@
             </div>
         </div>
     </div>
+    <script language="JavaScript">
+        layui.use(['form'],function () { });
+        function search(){
+            let key = layui.jquery('#key').val();
+            if (/^[A-Za-z0-9\-\_]+$/ig.test(key)){
+                location.href='?key='+key;
+            }else{
+                layui.jquery('#key').val('');
+                layui.layer.msg('关键字异常。',{icon:2});
+            }
+        }
+    </script>
 {/eq}
 
 {eq name="action" value="info"}
@@ -68,7 +83,8 @@
                             </div>
                             <div class="layui-inline">
                                 <button type="button" class="layui-btn layuiadmin-btn-useradmin" onclick="postCreate(this);">提交生成</button>
-                                （文件生成到application\Table，需要写入权）
+                                <button type="button" class="layui-btn" onclick="window.history.go(-1);">返回</button>
+                                （文件生成到Model\Entity，需要写入权）
                             </div>
                         </td>
                     </tr>
@@ -87,12 +103,12 @@
             {volist name="info.fields" id="vo"}
                 <tr>
                     <td><select name="condition[{$vo.name}]">
-                            <option value="0">不可</option>
                             <option value="1" {eq name="vo.condition" value="1"}selected{/eq}>可查</option>
+                            <option value="0">不可</option>
                         </select></td>
                     <td><select name="require[{$vo.name}]">
-                            <option value="">不设置</option>
                             <option value="null" {eq name="vo.require.0.0" value="null"}selected{/eq}>可为空</option>
+                            <option value="" {eq name="vo.require.0.0" value="no"}selected{/eq}>不设置</option>
                             <option value="require" {eq name="vo.require.0.0" value="require"}selected{/eq}>必填</option>
                         </select></td>
                     <td><input name="function[{$vo.name}]" value="{$vo.require.0.1}" style="width:100%;" /></td>

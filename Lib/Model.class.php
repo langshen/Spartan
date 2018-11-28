@@ -39,7 +39,7 @@ class Model {
      * @return mixed
      */
     public function getTable($objClass){
-        $clsTable = $this->getModel($objClass,'Table');
+        $clsTable = $this->getModel($objClass,'Model\\Entity');
         if (!is_object($clsTable)){
             \Spt::halt(['表类不存在,请生成:'.$objClass,$clsTable]);
         }
@@ -50,7 +50,7 @@ class Model {
      * 实例化一个Model类或指定名称的Model子类
      * @param $objClass \stdClass|string
      * @param $strType string
-     * @return mixed|Model|StdCalss
+     * @return mixed|Model|\stdClass
      */
     public function getModel($objClass,$strType = 'Model'){
         if (is_object($objClass)){//是一个类
@@ -101,7 +101,7 @@ class Model {
 
     /**
      * 批量提取寄存变量
-     * @param string|mixed $arrName
+     * @param string|mixed $mixName
      * @return array
      */
     public function getFieldData($mixName){
@@ -182,8 +182,7 @@ class Model {
      * @param $arrFields mixed 表Model的所有字段
      * @return array
      */
-    public function getTabelFieldsToFieldData($arrFields){
-        $arrFields = [];
+    public function getTableFieldsToFieldData($arrFields = []){
         foreach($arrFields as $k=>$v){
             if (in_array($v[0],['int','tinyint','smallint'])){
                 $arrFields[$k] = is_numeric($v[7])?$v[7]:0;

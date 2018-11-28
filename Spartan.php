@@ -72,8 +72,8 @@ class Spt {
     private static function createAppDir($strAppName=APP_NAME) {
         $arrDir = Array(
             APP_ROOT.'Common'.DS,
-            APP_ROOT.'Table'.DS,
             APP_ROOT.'Model'.DS,
+            APP_ROOT.'Model'.DS.'Entity'.DS,
             APP_ROOT.$strAppName.DS,
             APP_ROOT.$strAppName.DS.'Controller'.DS,
             APP_ROOT.$strAppName.DS.'Common'.DS,
@@ -140,9 +140,9 @@ class Spt {
         $strFile = APP_ROOT.$strAppName.DS.'Common'.DS.'Functions.php';
         !is_file($strFile) && file_put_contents($strFile,trim($strCommonFun,PHP_EOL));
         //初始化Model/Model目录
-        list($strTable,$strModel,$strCache,$strLog,$strAttach,$strExtend,$strAdmin,$strStatic) = explode('{README}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_readme.tpl'));
-        $strFile = APP_ROOT.'Table'.DS.'README.md';
-        !is_file($strFile) && file_put_contents($strFile,trim($strTable,PHP_EOL));
+        list($strEntity,$strModel,$strCache,$strLog,$strAttach,$strExtend,$strAdmin,$strStatic) = explode('{README}',file_get_contents(FRAME_PATH.'Tpl'.DS.'default_readme.tpl'));
+        $strFile = APP_ROOT.'Model'.DS.'Entity'.DS.'README.md';
+        !is_file($strFile) && file_put_contents($strFile,trim($strEntity,PHP_EOL));
         $strFile = APP_ROOT.'Model'.DS.'README.md';
         !is_file($strFile) && file_put_contents($strFile,trim($strModel,PHP_EOL));
         $strFile = APP_ROOT.'Runtime'.DS.'Cache'.DS.'README.md';//当前项目
@@ -332,7 +332,7 @@ class Spt {
         $dirName = strstr($class,'\\', false);
         if ($appName == 'Spartan'){//框架文件
             $dirName = FRAME_PATH . $dirName;
-        }elseif ($appName == 'Table' || $appName == 'Model'){//系统项目
+        }elseif ($appName == 'Model'){//系统项目
             $dirName = APP_ROOT . $appName . $dirName;
         }elseif ($appName == self::$arrConfig['SUB_APP_NAME']){//子项目
             $dirName = APP_ROOT . $appName . $dirName;
@@ -510,7 +510,7 @@ class Spt {
         (($intPos = strpos($strPath,'?')) !== false) && $strPath = substr($strPath,0,$intPos);//只拿到？号之前
         $strPath = str_ireplace('.php','',str_ireplace('.html','',$strPath));//去掉常见后缀
         $arrPath = explode('/',strip_tags($strPath));//得到 / 拆分后的干净数组
-        foreach ($arrPath as $k=>$v){if($v==''){unset($arrPath[$k]);}else{$arrPath[$k]=strtolower($v);}}
+        foreach ($arrPath as $k=>$v){if($v==''){unset($arrPath[$k]);}}
         $arrPath = array_values($arrPath);
         !$arrPath && $arrPath[0] = $arrPath[1] = 'Index';//默认为index
         $arrPath[0] = ucfirst($arrPath[0]);
@@ -531,15 +531,15 @@ class Spt {
         self::$arrConfig['DEBUG'] && !is_dir($strSubAppName) && self::createAppDir($strSubAppName); //检测并创建目录
         self::loadApp($strSubAppName);
         $strModule = $strSubAppName . '\\Controller\\' . $strControl;//目标类
-        $strEmptyModule = $strSubAppName . '\\Controller\\Empty';//空类
+        $strErrorModule = $strSubAppName . '\\Controller\\Error';//空类
         $objModule = class_exists($strModule)?new $strModule():null;//实例化目标类
         if (!is_object($objModule)){//如果没有得到指定类，就使用空控制器
-            (class_exists($strEmptyModule) && $strControl = 'Empty') && $objModule = new $strEmptyModule();
+            (class_exists($strErrorModule) && $strControl = 'Error') && $objModule = new $strErrorModule();
         }
         self::$arrConfig['CONTROL'] = $strControl;//定义全局正在使用的最终控制器
         !is_object($objModule) && self::halt(//控制器 和 空控制都不存在，退出并提示
             "[".$arrPath[0]."]({$strModule}) Controller not existing.".
-            "[Empty]({$strEmptyModule}) Controller not existing."
+            "[Error]({$strErrorModule}) Controller not existing."
         );
         if(!method_exists($objModule,$strAction)){//方法 和 空方法都不存在，退出并提示
             !method_exists($objModule,'_empty') && self::halt(

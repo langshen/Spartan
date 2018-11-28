@@ -251,14 +251,19 @@ class Mysqli implements Db {
      * @param $page
      * @return array
      */
-    public function getTables($intLinkID,$strTable = '',$limit = 0,$page = 1) {
+    public function getTables($intLinkID,$strTable = '',$limit = 0,$page = 1,$strKey = '') {
         $page = max(1,intval($page));
         $strLimit = $limit > 0?' LIMIT '.$limit*($page-1).','.$limit:'';
         $arrResult = Array('data'=>[],'total'=>0);
+        if (preg_match('/^[A-Za-z0-9\-\_]+$/',$strKey)){
+            $strKey = " AND TABLE_NAME like '%".$strKey."%'";
+        }else{
+            $strKey = '';
+        }
         if ($strTable){
             $arrResult['total'] = 1;
         }else{
-            $strSql = "SELECT"." count(*) as tmp FROM information_schema.tables WHERE table_schema = '".$this->arrConfig['NAME']."'";
+            $strSql = "SELECT"." count(*) as tmp FROM information_schema.tables WHERE table_schema = '".$this->arrConfig['NAME']."'".$strKey;
             $queryID = mysqli_query($intLinkID,$strSql);
             $arrRow = mysqli_fetch_assoc($queryID);
             if($arrRow && isset($arrRow['tmp'])){
@@ -266,7 +271,7 @@ class Mysqli implements Db {
             }
         }
         $strSql = "SELECT"." TABLE_NAME,ENGINE,TABLE_ROWS,AUTO_INCREMENT,CREATE_TIME,UPDATE_TIME,TABLE_COLLATION,".
-                  "TABLE_COMMENT FROM information_schema.tables WHERE table_schema = '".$this->arrConfig['NAME']."'".
+                  "TABLE_COMMENT FROM information_schema.tables WHERE table_schema = '".$this->arrConfig['NAME']."'".$strKey.
                   ($strTable?" AND TABLE_NAME = '".$this->arrConfig['PREFIX'].$strTable."'":'').
                   " {$strLimit}";
         $result = mysqli_query($intLinkID,$strSql);

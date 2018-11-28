@@ -369,9 +369,9 @@ class Db{
      * @param $page
      * @return array
      */
-    public function getTables($tableName = '',$limit = 0,$page = 1){
+    public function getTables($tableName = '',$limit = 0,$page = 1,$strKey = ''){
         !$this->linkID && $this->initConnect(true);
-        return $this->clsDriverInstance->getTables($this->linkID,$tableName,$limit,$page);
+        return $this->clsDriverInstance->getTables($this->linkID,$tableName,$limit,$page,$strKey);
     }
 
     /**

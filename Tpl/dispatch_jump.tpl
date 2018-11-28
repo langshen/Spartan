@@ -17,14 +17,17 @@
 </head>
 <body>
 <div class="system-message">
-    <?php switch ($code) { ?>
+    <?php
+    $codeName = config('GET.API.CODE','code');
+    $msgName = config('GET.API.MSG','msg');
+    switch ($$codeName) { ?>
     <?php case 1:?>
     <h1>:)</h1>
-    <p class="success"><?php echo(strip_tags($msg));?></p>
+    <p class="success"><?php echo(strip_tags($$msgName));?></p>
     <?php break;?>
     <?php case 0:?>
     <h1>:(</h1>
-    <p class="error"><?php echo(strip_tags($msg));?></p>
+    <p class="error"><?php echo(strip_tags($$msgName));?></p>
     <?php break;?>
     <?php } ?>
     <p class="detail"></p>

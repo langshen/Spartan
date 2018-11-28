@@ -1,8 +1,8 @@
 <?php
-namespace Table\{$strTablePath};
+namespace Model\Entity\{$strTablePath};
 
 defined('APP_NAME') or die('404 Not Found');
-class {$strTableClass} extends \Spartan\Driver\Model\Table
+class {$strTableClass} extends \Spartan\Driver\Model\Entity
 {
     //表名前缀
 	public $strPrefix = '{$strPrefix}';

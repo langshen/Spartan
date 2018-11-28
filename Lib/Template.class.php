@@ -37,7 +37,6 @@ class Template
         'taglib_load'        => true, // 是否使用内置标签库之外的其它标签库，默认自动检测
         'taglib_build_in'    => 'cx', // 内置标签库名称(标签使用不必指定标签库名称),以逗号分隔 注意解析顺序
         'taglib_pre_load'    => '', // 需要额外加载的标签库(须指定标签库名称)，多个以逗号分隔
-        'display_cache'      => false, // 模板渲染缓存
         'cache_id'           => '', // 模板缓存ID
         'tpl_replace_string' => [],
         'tpl_var_identify'   => 'array', // .语法变量识别，array|object|'', 为空时自动识别

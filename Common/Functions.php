@@ -14,7 +14,9 @@ function version(){
  */
 function config($name = '', $value = null)
 {
-    if ((substr($name,4)==='get.' || is_null($value)) && is_string($name)) {
+    if (strtolower(substr($name,0,4))==='get.'){
+        return \Spt::getConfig(substr($name,4),$value);
+    }elseif (is_null($value) && is_string($name)) {
         return \Spt::getConfig($name,$value);
     }else{
         return \Spt::setConfig($name,$value);
@@ -336,7 +338,7 @@ function model($modelName = '',$arrData = [])
  * 快捷实例化Model管理器
  * @param string $modelName 初始化的模型类，为空时为主类
  * @param array $arrData 初始化的数据
- * @return \Spartan\Driver\Model\Table|\Spartan\Lib\Model|mixed
+ * @return \Spartan\Driver\Model\Entity|\Spartan\Lib\Model|mixed
  */
 function dal($modelName = '',$arrData = [])
 {
@@ -452,3 +454,40 @@ function cnyMapUnit($list,$units) {
     }
     return $xs;
 };
+
+/**
+ * 从session_handler里得到一个Redis配置信息
+ * @return array|mixed
+ */
+function getRedisToSessionHandler(){
+    $arrPath = parse_url(config('SESSION_HANDLER.PATH'));
+    if (!isset($arrPath['host'])){
+        return [];
+    }
+    $arrPath['query'] && $arrPath['query'] = mb_substr($arrPath['query'],5);
+    unset($arrPath['scheme']);
+    return $arrPath;
+}
+
+/**
+ * 返回一个已连接的Redis实例
+ * @return Redis|void
+ */
+function redis(){
+    $arrConfig = getRedisToSessionHandler();
+    if (!$arrConfig){
+        return \Spt::halt('没有配置SESSION_HANDLER.PATH中的Redis信息。');
+    }
+    $redis = new \Redis();
+    $status = $redis->connect($arrConfig['host'],$arrConfig['port']);
+    if (isset($arrConfig['query']) && $arrConfig['query']){
+        if (!$redis->auth($arrConfig['query'])){
+            \Spt::halt('Redis验证失败：'.json_encode($arrConfig));
+        }
+    }
+    if(!$status){
+        print_r($arrConfig);
+        \Spt::halt('Redis连接失败：'.json_encode($arrConfig));
+    }
+    return $redis;
+}

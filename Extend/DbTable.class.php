@@ -12,7 +12,7 @@ class DbTable {
 
     public $config = [//配置文件
         'save_path'=>APP_ROOT,//保存目录,以/结尾
-        'name_space'=>'Table',//命名空间
+        'name_space'=>'Model\\Entity',//命名空间
     ];
 
     /**
@@ -29,6 +29,9 @@ class DbTable {
      */
     public function __construct($_arrConfig = []){
         $this->config = array_merge($this->config,$_arrConfig);
+        $arrTempClass = explode('\\',$this->config['name_space']);
+        array_walk($arrTempClass,function(&$v){$v = ucfirst($v);});unset($v);
+        $this->config['name_space'] = implode('\\',$arrTempClass);
     }
 
     /**
@@ -40,7 +43,9 @@ class DbTable {
     public function tableList($intLimit = 0,$intPage = 1){
         $intLimit < 1 && $intLimit = max(0,intval(request()->param('limit',0)));
         $intPage <= 1 && $intPage = max(0,intval(request()->param('page',1)));
-        $arrTable = Db()->getTables('',$intLimit,$intPage);
+        $strKey = request()->param('key','');
+        !preg_match('/^[A-Za-z0-9\-\_]+$/',$strKey) && $strKey = '';
+        $arrTable = Db()->getTables('',$intLimit,$intPage,$strKey);
         foreach ($arrTable['data'] as &$value){
             $clsTemp = model()->getModel($value['name'],$this->config['name_space']);
             $value['status'] = is_object($clsTemp)?'已生成':'未建立';
@@ -60,12 +65,14 @@ class DbTable {
             return Array('表名不能为空。',1);
         }
         $getFunc = function ($type,$long = 0){
-            if (in_array($type,['int','tinyint','smallint'])){
+            if (in_array($type,['int','tinyint','smallint','bigint'])){
                 return 'number';
             }elseif (in_array($type,['varchar','char','text'])){
                 return 'length'.($long>0?':1,'.$long:'');
-            }elseif(in_array($type,['decimal'])){
+            }elseif(in_array($type,['decimal','float'])) {
                 return 'float';
+            }elseif (in_array($type,['datetime','date'])){
+                return 'date';
             }else{
                 return '';
             }
@@ -97,6 +104,9 @@ class DbTable {
                 $arrTempRequire[0] = ['',$getFunc($v[0],$v[1])];//如果为空，给出默认函数
                 !$arrTempRequire[1] && $arrTempRequire[1] = $v[8];//给出默认提示
                 !$arrTempRequire[2] && $arrTempRequire[2] = $arrTempRequire[0][1]=='number'?intval($v[7]):'';//给出默认值
+            }
+            if ($v[7] == 'CURRENT_TIMESTAMP'){//有默认时间的不设置，$v[0] == 'datetime';
+                $arrTempRequire[0] = ['no',''];
             }
             $v = Array(
                 'condition'=>array_key_exists($k,$arrCondition)?'1':'',
@@ -222,11 +232,10 @@ class DbTable {
             $value = isset($arrVars[$item])?$arrVars[$item]:'';
             $strContent = str_replace('{$'.$item.'}', $value, $strContent);
         }
-        $strFilePath = $this->config['save_path'].
-            ucfirst(strtolower($this->config['name_space'])).
-            DS.$arrVars['strTablePath'];
+        $strFilePath = $this->config['save_path'].$this->config['name_space'].DS.$arrVars['strTablePath'];
+        $strFilePath = str_replace(['\\','/'],[DS,DS],$strFilePath);
         if (!is_dir($strFilePath)){
-            if (@mkdir($strFilePath,0755,true)){
+            if (!@mkdir($strFilePath,0755,true)){
                 return Array('目录不可写:'.$strFilePath,1);
             }
         }
@@ -241,8 +250,10 @@ class DbTable {
      * 已经存在的模型文件
      * @param int $intLimit
      * @param int $intPage
+     *  @return array|mixed
      */
     public function modelList($intLimit = 0,$intPage = 1){
+        unset($intLimit,$intPage);
         $this->loadTableModel(APP_ROOT.$this->config['name_space'],$arrFiles);
         $arrTableList = Db()->getTables();
         if (!isset($arrTableList['data']) || !$arrTableList['data']){
@@ -342,7 +353,8 @@ class DbTable {
                 }else{
                     if (substr($strFile,0 - $intExtLen) == CLASS_EXT){
                         $strFile = trim(explode(APP_ROOT,strstr($strFile,'.',true))[1],DS.'.');
-                        if (explode(DS,$strFile)[0] != $this->config['name_space']){
+                        $arrTemp = explode(DS,$strFile);
+                        if ($arrTemp[0].'\\'.$arrTemp[1] != $this->config['name_space']){
                             continue;
                         }
                         $arrFileName[] = $strFile;

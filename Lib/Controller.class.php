@@ -140,9 +140,9 @@ class Controller{
             $url = $_SERVER["HTTP_REFERER"];
         }
         $result = [
-            'code' => 1,
-            'msg'  => $msg,
-            'data' => $data,
+            config('GET.API.CODE','code') => 1,
+            config('GET.API.MSG','msg')  => $msg,
+            config('GET.API.DATA','data') => $data,
             'url'  => $url,
             'wait' => $wait,
         ];
@@ -174,9 +174,9 @@ class Controller{
             $url = $this->request->isAjax() ? '' : 'javascript:history.back(-1);';
         }
         $result = [
-            'code' => 0,
-            'msg'  => $msg,
-            'data' => $data,
+            config('GET.API.CODE','code') => 0,
+            config('GET.API.MSG','msg')  => $msg,
+            config('GET.API.DATA','data') => $data,
             'url'  => $url,
             'wait' => $wait,
         ];
@@ -200,7 +200,8 @@ class Controller{
      */
     protected function redirect($url, $params = [], $code = 302, $with = [])
     {
-        return redirect($url, $params, $code)->with($with)->send();
+        redirect($url, $params, $code)->with($with)->send();
+        exit();
     }
 
     /**
@@ -265,17 +266,19 @@ class Controller{
     protected function api($msg = '', $code = 0,$data = [], array $header = [])
     {
         $data = [
-            'code' => $code,
-            'msg'  => $msg,
+            config('GET.API.CODE','code') => $code,
+            config('GET.API.MSG','msg')  => $msg,
+            config('GET.API.DATA','data') => $data,
             'time' => time(),
-            'data' => $data,
         ];
         return json($data,200,$header)->send();
     }
 
     /**
      * 快捷输出API数据到客户端
-     * @param array|string $data 要返回的数据
+     * @param array|string $minxData 要返回的数据
+     * @param int $intCode 状态
+     * @param array $arrData 数据
      * @return mixed
      */
     protected function toApi($minxData,$intCode = 1,$arrData = []){
@@ -299,7 +302,7 @@ class Controller{
 
     /**
      * 批量提取寄存变量
-     * @param string|mixed $arrName
+     * @param string|mixed $mixName
      * @return array
      */
     public function getFieldData($mixName){

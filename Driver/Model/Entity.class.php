@@ -2,7 +2,7 @@
 namespace Spartan\Driver\Model;
 use Spartan\Lib\Model;
 
-class Table extends Model
+class Entity extends Model
 {
     public $arrConfig = [
         'filter'=>[],//不自动select的字段
@@ -191,7 +191,8 @@ class Table extends Model
                 return $bolArray?["主键：{$key}不在字段中",1,[]]:false;
             }
             //主键是自增
-            if ($this->arrFields[$key][5] == 'true'){
+            //所有的字段名,[类型,长度,小数,字段格式,主键,增值,否空,默认值,注释]
+            if ($this->arrFields[$key][4] == 'true'||$this->arrFields[$key][5] == 'true'){
                 $strPrimary = $key;//这是自增主键的名
                 if (array_key_exists($key,$arrData) && $arrData[$key]){
                     $options['where'][$key] = $arrData[$key];
@@ -202,6 +203,7 @@ class Table extends Model
                 }
             }
         }
+
         //传递数据不是表字段的，删除
         foreach ($arrData as $key=>$value){
             if (!array_key_exists($key,$this->arrFields)){
@@ -214,7 +216,7 @@ class Table extends Model
                     isset($options['where'][$key]) &&
                     $options['where'][$key] &&
                     array_key_exists($key,$this->arrFields) &&
-                    $this->arrFields[$key][5] == 'true'
+                    ($this->arrFields[$key][4] == 'true'||$this->arrFields[$key][5] == 'true')
                 ){
                     $bolUpdate = true;
                     break;

@@ -48,6 +48,15 @@ class Curl{
 	}
 
     /**
+     * 设置一个头部
+     * @param $mixHeader
+     */
+	public function setHeader($mixHeader){
+	    !is_array($mixHeader) && $mixHeader = [$mixHeader];
+        curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $mixHeader);
+    }
+
+    /**
      * @param $key
      * @param $value
      * @return $this

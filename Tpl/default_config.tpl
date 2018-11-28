@@ -120,7 +120,7 @@ $arrTemp =  Array(
         'recharge'=>Array(1,'充值'),
         'withdraw'=>Array(2,'提现'),
         'reward'=>Array(3,'奖励'),
-        'vip'=>Array(4,'购买Vip'),
+        'vip'=>Array(4,'升级Vip'),
     ),
 );
 
@@ -144,7 +144,8 @@ return array_merge($arrConfig,$arrTemp);
 defined('APP_NAME') or die('404 Not Found');
 
 function attachPath($path=''){
-    return "../attachroot/".trim($path,'/');
+    //return "../attachroot/".trim($path,'/');//复件独立站点请使用该行
+    return "../wwwroot/attach/".trim($path,'/');//复件在www下请使用该行
 }
 function uploadPath($path=''){
     return attachPath($path);

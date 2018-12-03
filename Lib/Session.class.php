@@ -280,6 +280,15 @@ class Session
     }
 
     /**
+     * 返回session_id
+     * @return string
+     */
+    public function getSessionId(){
+        empty($this->init) && $this->boot();
+        return session_id();
+    }
+
+    /**
      * session 读写锁驱动实例化
      */
     protected function initDriver()

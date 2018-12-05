@@ -10,6 +10,7 @@ class Curl{
 	private $config = [];
 	private $openCookie = false;//是否开启COOKIES
 	private $cookies = [];//开启COOKIES时的变量
+    private $arrHeader = [];//设置发送头
 
     /**
      * Curl constructor.
@@ -27,6 +28,7 @@ class Curl{
      */
 	private function init(){
 		$this->curlHandle = curl_init();
+		$this->arrHeader[] = 'Expect:100-continue';
 		$options = array(
 			CURLOPT_RETURNTRANSFER => true,//结果为文件流
 			CURLOPT_TIMEOUT => 30,//超时时间，为秒。
@@ -36,15 +38,14 @@ class Curl{
 			CURLOPT_FORBID_REUSE => true,//在完成交互以后强迫断开连接，不能重用
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,//强制使用 HTTP/1.1
 			CURLOPT_ENCODING => 'gzip,deflate',//是否支持压缩
-			CURLOPT_HTTPHEADER => array('Expect:100-continue'),//大于1024K
 			CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 		);
 		if (isset($this->config['referer']) && $this->config['referer']){
-		    $options['CURLOPT_REFERER'] = $this->config['referer'];
+		    $options[CURLOPT_REFERER] = $this->config['referer'];
         }
         if (isset($this->config['follow_location']) && $this->config['follow_location'] == 1){
-            $options['CURLOPT_FOLLOWLOCATION'] = 1;//递归的抓取http头中Location中指明的url
-            $options['CURLOPT_MAXREDIRS'] = 5;//递归的次数
+            $options[CURLOPT_FOLLOWLOCATION] = 1;//递归的抓取http头中Location中指明的url
+            $options[CURLOPT_MAXREDIRS] = 5;//递归的次数
         }
 		foreach ($options as $key => $value){
 			$this->setOpt($key,$value);
@@ -54,10 +55,15 @@ class Curl{
     /**
      * 设置一个头部
      * @param $mixHeader
+     * @return $this;
      */
 	public function setHeader($mixHeader){
-	    !is_array($mixHeader) && $mixHeader = [$mixHeader];
-        curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $mixHeader);
+	    if (!is_array($mixHeader)){
+            $this->arrHeader[] = $mixHeader;
+        }else{
+            $this->arrHeader = array_merge($this->arrHeader,$mixHeader);
+        }
+        return $this;
     }
 
     /**
@@ -76,13 +82,9 @@ class Curl{
      */
     public function startCookie($cookies='not null'){
         $this->openCookie = true;
-        $cookies != 'not null' && $this->cookies[$cookies] = '';
+        $cookies != 'not null' && $this->setCookieString($cookies);
         if ($this->openCookie && $this->cookies){
-            $arrCookie = [];
-            foreach ($this->cookies as $k=>$v){
-                $arrCookie[] = $v?$k.'='.$v:$k;
-            }
-            $this->setOpt(CURLOPT_COOKIE,implode(';',$arrCookie));
+            $this->setOpt(CURLOPT_COOKIE,$this->getCookieToString());
         }
         return $this;
     }
@@ -100,7 +102,7 @@ class Curl{
     public function getCookieToString(){
         $arrCookies = [];
         foreach ($this->cookies as $k=>$v){
-            $arrCookies[] = trim($k).'='.trim($v);
+            $arrCookies[] = trim($v)?trim($k).'='.trim($v):trim($k);
         }
         return implode(';',$arrCookies);
     }
@@ -122,6 +124,27 @@ class Curl{
             list($key,$value) = explode($key);
         }
         $this->cookies[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @example __cfduid=d69c7ca7a4ceeabaab46d5101320cc47d1543934234;expires=Wed, 04-Dec-19 14:37:14 GMT;path=/;domain=.eunex.co;;Secure
+     * @param $value
+     * @return $this
+     */
+    public function setCookieString($value){
+        $arrTemp = explode(';',trim($value));
+        foreach ($arrTemp as $tempV){
+            if (!$tempV){continue;}
+            $tempV = explode('=',$tempV);
+            $tempV[0] = trim($tempV[0]);
+            if (count($tempV) > 1){
+                $this->cookies[$tempV[0]] = trim($tempV[1]);
+            }else{
+                $this->cookies[$tempV[0]] = '';
+            }
+        }
+        $this->cookies = array_unique(array_filter($this->cookies));
         return $this;
     }
 
@@ -164,14 +187,20 @@ class Curl{
             $postType = '';
         }
 		if($method == 'POST'){
-			curl_setopt($this->curlHandle, CURLOPT_POST, TRUE);
+            curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST,strtoupper($method));
 			if($postFields){
-			    is_array($postFields) && $postFields = $this->toUrl($postFields);
+			    if (is_array($postFields)){
+			        if ($postType == 'JSON'){
+                        $postFields = json_encode($postFields);
+                    }else{
+                        $postFields = $this->toUrl($postFields);
+                    }
+                }
 				curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $postFields);
 			}
             if ($postType == 'JSON'){
                 curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
-                curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, Array('Content-Type: application/json; charset=utf-8'));
+                $this->setHeader('Content-Type: application/json; charset=utf-8');
             }
 		}else{
 			curl_setopt($this->curlHandle, CURLOPT_POST, false);
@@ -180,9 +209,9 @@ class Curl{
 			curl_setopt($this->curlHandle,CURLOPT_SSL_VERIFYPEER, false); //不验证证书下同
 			curl_setopt($this->curlHandle,CURLOPT_SSL_VERIFYHOST, false); //
 		}
+        curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, array_unique($this->arrHeader));
 		curl_setopt($this->curlHandle,CURLOPT_URL,$url);
 		$data = explode("\r\n\r\n",curl_exec($this->curlHandle));
-		//var_dump($data);
 		foreach ($data as $v){
             $this->headers = array_shift($data);
             if (stripos($this->headers,'HTTP/1.1 200 OK')===0 || ((stripos($this->headers,'Content-Type:')>0) &&
@@ -192,7 +221,9 @@ class Curl{
             }
         }
         $this->content = implode("\r\n\r\n",$data);
-        //$requestInfo = curl_getinfo($this->curlHandle);print_r($requestInfo);print_r($data);die();
+		//debug
+        //$requestInfo = curl_getinfo($this->curlHandle,CURLINFO_HEADER_OUT);print_r($requestInfo);print_r($this->headers);print_r("\r\n\r\n");print_r($data);
+        //die();
 		if(stripos($this->headers,'charset=GBK')!==false){
             $this->content = iconv('GBK','utf-8//IGNORE',$this->content);
         }
@@ -201,16 +232,7 @@ class Curl{
             if (isset($matches[1]) && is_array($matches[1]) && $matches[1]){
                 foreach ($matches[1] as $v){
                     $v = str_replace('HttpOnly','',$v);
-                    $arrTemp = explode(';',trim($v));
-                    foreach ($arrTemp as $tempV){
-                        if (!$tempV){continue;}
-                        $tempV = explode('=',$tempV);
-                        if (count($tempV) > 1){
-                            $this->cookies[$tempV[0]] = $tempV[1];
-                        }else{
-                            $this->cookies[$tempV[0]] = '';
-                        }
-                    }
+                    $this->setCookieString($v);
                 }
             }
         }

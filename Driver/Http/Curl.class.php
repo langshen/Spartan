@@ -7,6 +7,7 @@ class Curl{
 	private $curlHandle = null;
 	private $content = null;
 	private $headers = null;
+	private $headersOut = null;
 	private $config = [];
 	private $openCookie = false;//是否开启COOKIES
 	private $cookies = [];//开启COOKIES时的变量
@@ -28,7 +29,7 @@ class Curl{
      */
 	private function init(){
 		$this->curlHandle = curl_init();
-		$this->arrHeader[] = 'Expect:100-continue';
+		$this->arrHeader = ['Expect:100-continue'];
 		$options = array(
 			CURLOPT_RETURNTRANSFER => true,//结果为文件流
 			CURLOPT_TIMEOUT => 30,//超时时间，为秒。
@@ -112,6 +113,14 @@ class Curl{
      */
     public function clearCookie(){
         $this->cookies = [];
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function clearHeader(){
+        $this->arrHeader = ['Expect:100-continue'];
         return $this;
     }
     /**
@@ -221,9 +230,7 @@ class Curl{
             }
         }
         $this->content = implode("\r\n\r\n",$data);
-		//debug
-        //$requestInfo = curl_getinfo($this->curlHandle,CURLINFO_HEADER_OUT);print_r($requestInfo);print_r($this->headers);print_r("\r\n\r\n");print_r($data);
-        //die();
+		$this->headersOut = curl_getinfo($this->curlHandle,CURLINFO_HEADER_OUT);
 		if(stripos($this->headers,'charset=GBK')!==false){
             $this->content = iconv('GBK','utf-8//IGNORE',$this->content);
         }
@@ -254,6 +261,22 @@ class Curl{
             $arrTemp[] = $k . '='. (is_array($v)?json_encode($v):$v);
         }
         return implode('&',$arrTemp);
+    }
+
+    /**
+     * 读取请求头
+     * @return null
+     */
+    public function requestHeader(){
+	    return $this->headers;
+    }
+
+    /**
+     * 读取返回头
+     * @return null
+     */
+    public function responseHeader(){
+        return $this->headersOut;
     }
 
     /**

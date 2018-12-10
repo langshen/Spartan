@@ -491,3 +491,25 @@ function redis(){
     }
     return $redis;
 }
+
+/**
+ * 按进一法取小数
+ * @param $v
+ * @param int $n
+ * @return float|int
+ */
+function getCeil($v,$n=2){
+    $v = number_format(ceil($v*pow(10,$n)),0,'','');
+    return $v/pow(10,$n);
+}
+
+/**
+ * 进舍去法取小数
+ * @param $v
+ * @param int $n
+ * @return float|int
+ */
+function getFloor($v,$n=2){
+    $v = number_format($v*pow(10,$n),0,'','');
+    return $v/pow(10,$n);
+}

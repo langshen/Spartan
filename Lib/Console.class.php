@@ -9,8 +9,10 @@ class Console{
      * @param string $key
      * @param bool $end
      * @param string $value
+     * @return mixed
      */
     public function console($key='',$value='',$end = false){
         \Spt::console($key,$value,$end);
+        return true;
     }
 }

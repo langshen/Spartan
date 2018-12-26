@@ -1173,7 +1173,12 @@ class Template
         }else{
             $template = $template?$template:strtolower(\Spt::$arrConfig['ACTION']);
         }
-        $template = realpath(config('APP_PATH').'View'.DS.$strModule.DS.$template.'.html');
+        if (substr($template,0,3) == '../'){
+            $template = substr($template,3);
+        }else{
+            $template = $strModule.DS.$template;
+        }
+        $template = config('APP_PATH').'View'.DS.$template.'.html';
         if (is_file($template)) {
             $this->includeFile[$template] = filemtime($template);
             return $template;

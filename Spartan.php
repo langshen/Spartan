@@ -50,6 +50,8 @@ class Spt {
         !$_arrConfig['SUB_APP_NAME'] && $_arrConfig['SUB_APP_NAME'] = APP_NAME;
         date_default_timezone_set($_arrConfig['TIME_ZONE']);//设置系统时区
         $_arrConfig['APP_PATH'] = APP_ROOT.APP_NAME.DS;
+        $_arrConfig['APP_BASE'] = dirname(APP_ROOT).DS;
+        $_arrConfig['APP_EXTEND'] = $_arrConfig['APP_BASE'].'extend'.DS;
         self::$arrConfig = $_arrConfig;unset($_arrConfig);//全局化当前配置
         self::$arrConfig['DEBUG'] && self::createAppDir(APP_NAME); //检测并创建目录
         if (self::$arrConfig['IS_CLI']){

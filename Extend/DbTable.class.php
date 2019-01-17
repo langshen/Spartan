@@ -65,11 +65,11 @@ class DbTable {
             return Array('表名不能为空。',1);
         }
         $getFunc = function ($type,$long = 0){
-            if (in_array($type,['int','tinyint','smallint','bigint'])){
+            if (in_array($type,['int','tinyint','smallint','bigint','mediumint'])){
                 return 'number';
             }elseif (in_array($type,['varchar','char','text'])){
                 return 'length'.($long>0?':1,'.$long:'');
-            }elseif(in_array($type,['decimal','float'])) {
+            }elseif(in_array($type,['decimal','float','double','real'])) {
                 return 'float';
             }elseif (in_array($type,['datetime','date'])){
                 return 'date';

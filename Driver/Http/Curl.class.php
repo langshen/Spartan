@@ -195,7 +195,7 @@ class Curl{
         }else{
             $postType = '';
         }
-		if($method == 'POST'){
+		if($method == 'POST' || $method == 'DELETE'){
             curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST,strtoupper($method));
 			if($postFields){
 			    if (is_array($postFields)){

@@ -408,6 +408,14 @@ function isMobile($strMobile){
 }
 
 /**
+ * @param $strUserName
+ * @return false|int
+ */
+function isUserName($strUserName){
+    return preg_match("/^[a-zA-Z][A-Za-z0-9]+$/",$strUserName);
+}
+
+/**
  * 数字转大写
  * @param $number
  * @return mixed

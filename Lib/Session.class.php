@@ -133,6 +133,9 @@ class Session
      */
     public function init(array $config = [])
     {
+        if ($this->init){//如果已经启动了，就不再设置了
+            return $this;
+        }
         $_config = array_change_key_case(config('SESSION'),CASE_LOWER);
         $config = array_merge($this->config,$_config,$config);
         $isDoStart = false;

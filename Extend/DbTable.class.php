@@ -345,7 +345,7 @@ class DbTable {
         $intExtLen = strlen(CLASS_EXT);
         $arrNextPath = [];
         foreach($arrDir as $dir){
-            $arrCore = new \RecursiveDirectoryIterator(rtrim($dir,DS).DS);
+            $arrCore = new \RecursiveDirectoryIterator(rtrim(str_replace(['\\','/'],[DS,DS],$dir),DS).DS);
             foreach($arrCore as $objFile){
                 $strFile = $objFile->getPathname();
                 if ($objFile->isDir()){

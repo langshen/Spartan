@@ -508,7 +508,7 @@ function redis(){
  */
 function getCeil($v,$n=2){
     $v = number_format(ceil($v*pow(10,$n)),0,'','');
-    return $v/pow(10,$n);
+    return bcdiv($v,pow(10,$n),$n);
 }
 
 /**
@@ -518,5 +518,5 @@ function getCeil($v,$n=2){
  * @return float|int
  */
 function getFloor($v,$n=2){
-    return floor((string)($v*pow(10,$n)))/pow(10,$n);
+    return bcdiv(floor((string)($v*pow(10,$n))),pow(10,$n),$n);
 }

@@ -522,6 +522,6 @@ function getFloor($v,$n=2){
     return bcdiv(floor((string)($v*pow(10,$n))),pow(10,$n),$n);
 }
 
-function rand(){
+function rnd(){
     return microtime(true);
 }

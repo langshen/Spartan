@@ -403,6 +403,7 @@ class Spt {
      * 错误输出
      * @param string $title
      * @param string|array $info
+     * @return mixed
      */
     public static function halt($info,$title = 'system error'){
         list($info1,$info2) = is_array($info)?$info:[$info,''];

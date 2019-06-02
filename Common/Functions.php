@@ -363,6 +363,7 @@ function validate(array $rules = [], array $message = [], array $field = [])
 
 /**
  * @param $arrData
+ * @return mixed
  */
 function valid(&$arrData,&$errInfo = ''){
     $rules = $message = $field = $data = [];
@@ -479,7 +480,7 @@ function getRedisToSessionHandler(){
 
 /**
  * 返回一个已连接的Redis实例
- * @return Redis|void
+ * @return Redis|void|mixed
  */
 function redis(){
     $arrConfig = getRedisToSessionHandler();
@@ -519,4 +520,8 @@ function getCeil($v,$n=2){
  */
 function getFloor($v,$n=2){
     return bcdiv(floor((string)($v*pow(10,$n))),pow(10,$n),$n);
+}
+
+function rand(){
+    return microtime(true);
 }

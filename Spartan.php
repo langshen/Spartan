@@ -336,10 +336,10 @@ class Spt {
             $dirName = FRAME_PATH . $dirName;
         }elseif ($appName == 'Model'){//系统项目
             $dirName = APP_ROOT . $appName . $dirName;
-        }elseif ($appName == self::$arrConfig['SUB_APP_NAME']){//子项目
+        }elseif ($appName == self::$arrConfig['SUB_APP_NAME'] || $appName == APP_NAME){//子项目
             $dirName = APP_ROOT . $appName . $dirName;
         }else{//如果不是系统
-            $dirName = ($appName==APP_NAME?self::$arrConfig['APP_PATH']:self::$arrConfig['APP_PATH'].'../'. $appName).$dirName;
+            $dirName = self::$arrConfig['APP_PATH'].'../'. $appName.$dirName;
         }
         $fileName = str_replace('//','/',str_replace('\\','/',$dirName)) . CLASS_EXT;
         if (self::$arrConfig['IS_CLI'] && !is_file($fileName)){

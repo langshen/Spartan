@@ -76,6 +76,9 @@ class Spt {
             APP_ROOT.'Common'.DS,
             APP_ROOT.'Model'.DS,
             APP_ROOT.'Model'.DS.'Entity'.DS,
+            APP_ROOT.'Runtime'.DS,
+            APP_ROOT.'Runtime'.DS.'Cache'.DS,
+            APP_ROOT.'Runtime'.DS.'Log'.DS,
             APP_ROOT.$strAppName.DS,
             APP_ROOT.$strAppName.DS.'Controller'.DS,
             APP_ROOT.$strAppName.DS.'Common'.DS,
@@ -86,7 +89,6 @@ class Spt {
             $arrDir[] = dirname($strDocumentDir).DS.'extend';
             $arrDir[] = $strDocumentDir.'static'.DS.'admin';
             $arrDir[] = $strDocumentDir.'static'.DS.'www';
-            $arrDir[] = APP_ROOT.'Runtime'.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Cache'.DS.$strAppName.DS;
             $arrDir[] = APP_ROOT.'Runtime'.DS.'Log'.DS.$strAppName.DS;
             $arrDir[] = APP_ROOT.$strAppName.DS.'View'.DS;

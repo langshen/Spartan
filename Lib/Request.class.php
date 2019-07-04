@@ -2001,6 +2001,18 @@ class Request
     }
 
     /**
+     * 设置Param数据
+     * @access public
+     * @param  array $param 数据
+     * @return $this
+     */
+    public function withParam(array $param)
+    {
+        $this->param = array_merge($this->param,$param);
+        return $this;
+    }
+
+    /**
      * 设置GET数据
      * @access public
      * @param  array $get 数据

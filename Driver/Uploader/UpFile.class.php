@@ -13,7 +13,7 @@ class UpFile
     private $file;                 //文件上传对象
     private $config = Array(//配置信息
         'allow_files'=>['.gif', '.jpg', '.jpeg', '.bmp', '.png', '.swf'],
-        'max_size'=>3*1024,
+        'max_size'=>50*1024,
         'save_path'=>'',
         'url_root'=>'/',//URL的根目录
         'base64'=>false,//是否解析base64编码，可省略。若开启，则$fileField代表的是base64编码的字符串表单名

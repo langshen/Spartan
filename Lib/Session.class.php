@@ -153,11 +153,11 @@ class Session
         if (isset($config['use_lock']) && $config['use_lock']) {
             $this->lock = $config['use_lock'];
         }
-        if (isset($config['var_session_id']) && isset($_REQUEST[$config['var_session_id']])) {
+        if (($config['var_session_id']??'') && strlen($_REQUEST[$config['var_session_id']]??'')>10) {
             session_id($_REQUEST[$config['var_session_id']]);
-        } elseif (isset($config['id']) && $config['id'] && !empty($config['id'])) {
+        } elseif (($config['id']??'') && strlen($config['id']??'') > 10) {
             session_id($config['id']);
-        } elseif (isset($_REQUEST['php_id']) && isset($_REQUEST['php_id'])) {
+        } elseif (strlen($_REQUEST['php_id']??'') > 10) {
             session_id($_REQUEST['php_id']);
         }
         if (isset($config['name']) && $config['name']) {

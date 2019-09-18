@@ -21,8 +21,8 @@ class Session
         'domain'=>'',
         'expire'=>'',
         'secure'=>'',
-        'httponly'=>'',
-        'use_cookies'=>'',
+        'httponly'=>1,
+        'use_cookies'=>1,
         'cache_limiter'=>'',
         'cache_expire'=>'',
         'type'=>'',
@@ -75,7 +75,7 @@ class Session
 
     public function __construct(array $config = [])
     {
-        $this->config = $config;
+        $config && $this->config = array_merge($this->config,$config);
     }
 
     /**
@@ -105,11 +105,9 @@ class Session
     public function setConfig(array $config = [])
     {
         $this->config = array_merge($this->config, array_change_key_case($config));
-
         if (isset($config['prefix'])) {
             $this->prefix = $config['prefix'];
         }
-
         if (isset($config['use_lock'])) {
             $this->lock = $config['use_lock'];
         }

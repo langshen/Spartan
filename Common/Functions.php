@@ -482,12 +482,17 @@ function getRedisToSessionHandler(){
  * 返回一个已连接的Redis实例
  * @return Redis|void|mixed
  */
-function redis(){
+function redis($bloCoroutine=false){
     $arrConfig = getRedisToSessionHandler();
     if (!$arrConfig){
         return \Spt::halt('没有配置SESSION_HANDLER.PATH中的Redis信息。');
     }
-    $redis = new \Redis();
+    if ($bloCoroutine){
+        $redis = new \Swoole\Coroutine\Redis();
+        $redis->setOptions(['compatibility_mode'=>true,'timeout'=>2]);
+    }else{
+        $redis = new \Redis();
+    }
     $status = $redis->connect($arrConfig['host'],$arrConfig['port']);
     if (isset($arrConfig['query']) && $arrConfig['query']){
         if (!$redis->auth($arrConfig['query'])){

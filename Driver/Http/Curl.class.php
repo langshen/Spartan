@@ -130,7 +130,7 @@ class Curl{
      */
     public function setCookie($key,$value=''){
         if (!$value && stripos($key,'=') > 0){
-            list($key,$value) = explode($key);
+            list($key,$value) = explode('=',$key);
         }
         $this->cookies[$key] = $value;
         return $this;

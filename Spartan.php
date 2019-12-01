@@ -1,7 +1,6 @@
 <?php
 version_compare(PHP_VERSION,'5.6','<') && die('You need to use version 5.6 or higher.');
 define('DS',DIRECTORY_SEPARATOR);//标准分隔符
-define('CLASS_EXT','.class.php');//设置类的后缀名
 define('FRAME_PATH',__DIR__.DS);//设置框架路径
 
 class Spt {
@@ -52,6 +51,7 @@ class Spt {
         $_arrConfig['APP_PATH'] = APP_ROOT.APP_NAME.DS;
         $_arrConfig['APP_BASE'] = dirname(APP_ROOT).DS;
         $_arrConfig['APP_EXTEND'] = $_arrConfig['APP_BASE'].'extend'.DS;
+        $_arrConfig['CLASS_EXT'] = '.class.php';//设置类的后缀名
         self::$arrConfig = $_arrConfig;unset($_arrConfig);//全局化当前配置
         self::$arrConfig['DEBUG'] && self::createAppDir(APP_NAME); //检测并创建目录
         if (self::$arrConfig['IS_CLI']){
@@ -101,7 +101,7 @@ class Spt {
             !is_dir($dir) && ($bolCreate = true && mkdir($dir,0755,true));
         }
         if (!$bolCreate && self::$arrConfig['IS_CLI']){
-            if (!is_file(APP_ROOT.$strAppName.DS.'Controller'.DS.ucfirst(self::$arrConfig['CONTROLLER']).CLASS_EXT)){
+            if (!is_file(APP_ROOT.$strAppName.DS.'Controller'.DS.ucfirst(self::$arrConfig['CONTROLLER']).self::$arrConfig['CLASS_EXT'])){
                 $bolCreate = true;
             }
         }
@@ -118,14 +118,14 @@ class Spt {
         if (self::$arrConfig['IS_CLI']){
             (!isset(self::$arrConfig['CONTROLLER']) || !self::$arrConfig['CONTROLLER']) && self::$arrConfig['CONTROLLER'] = 'Main';
             (!isset(self::$arrConfig['MAIN_FUN']) || !self::$arrConfig['MAIN_FUN']) && self::$arrConfig['MAIN_FUN'] = 'runMain';
-            $strFile = APP_ROOT.$strAppName.DS.'Controller'.DS.ucfirst(self::$arrConfig['CONTROLLER']).CLASS_EXT;
+            $strFile = APP_ROOT.$strAppName.DS.'Controller'.DS.ucfirst(self::$arrConfig['CONTROLLER']).self::$arrConfig['CLASS_EXT'];
             !is_file($strFile) && file_put_contents($strFile, str_replace(
                 ['{App_NAME}','{CONTROLLER}','{MAIN_FUN}'],
                 [$strAppName,self::$arrConfig['CONTROLLER'],self::$arrConfig['MAIN_FUN']],
                 trim($strSClass,PHP_EOL)
             ));
         }else{
-            $strFile = APP_ROOT.$strAppName.DS.'Controller'.DS.'Index'.CLASS_EXT;
+            $strFile = APP_ROOT.$strAppName.DS.'Controller'.DS.'Index'.self::$arrConfig['CLASS_EXT'];
             !is_file($strFile) && file_put_contents($strFile,str_replace('{App_NAME}',$strAppName,trim($strClass,PHP_EOL)));
             $strFile = APP_ROOT.$strAppName.DS.'View'.DS.'Index'.DS.'index.html';
             !is_file($strFile) && file_put_contents($strFile,trim($strHtml,PHP_EOL));
@@ -284,7 +284,7 @@ class Spt {
      * @param $strDir
      * @param $ext
      */
-    public static function loadDirFile($strDir, $ext = CLASS_EXT){
+    public static function loadDirFile($strDir, $ext = '.class.php'){
         $arrDir = is_array($strDir)?$strDir:explode(',',$strDir);
         $intExtLen = strlen($ext);
         $arrNextPath = [];
@@ -335,15 +335,20 @@ class Spt {
         $appName = strstr($class,'\\',true);
         $dirName = strstr($class,'\\', false);
         if ($appName == 'Spartan'){//框架文件
-            $dirName = FRAME_PATH . $dirName;
-        }elseif ($appName == 'Model'){//系统项目
-            $dirName = APP_ROOT . $appName . $dirName;
+            $dirName = FRAME_PATH . $dirName . self::$arrConfig['CLASS_EXT'];
+        }elseif ($appName == 'Model') {//系统项目
+            $dirName = APP_ROOT . $appName . $dirName . self::$arrConfig['CLASS_EXT'];
+        }elseif ($appName == 'Extend') {//系统项目
+            $dirName = self::$arrConfig['APP_EXTEND'] . $dirName . self::$arrConfig['CLASS_EXT'];
+        }elseif(self::$arrConfig['EXTEND'][$appName]??[]){
+            $dirName = self::$arrConfig['APP_EXTEND'] . (self::$arrConfig['EXTEND'][$appName]['path']??'') . $dirName;
+            $dirName = $dirName . (self::$arrConfig['EXTEND'][$appName]['ext']??self::$arrConfig['CLASS_EXT']);
         }elseif ($appName == self::$arrConfig['SUB_APP_NAME'] || $appName == APP_NAME){//子项目
-            $dirName = APP_ROOT . $appName . $dirName;
+            $dirName = APP_ROOT . $appName . $dirName . self::$arrConfig['CLASS_EXT'];
         }else{//如果不是系统
-            $dirName = self::$arrConfig['APP_PATH'].'../'. $appName.$dirName;
+            $dirName = self::$arrConfig['APP_PATH'].'../'. $appName . $dirName . self::$arrConfig['CLASS_EXT'];
         }
-        $fileName = str_replace('//','/',str_replace('\\','/',$dirName)) . CLASS_EXT;
+        $fileName = str_replace('//','/',str_replace('\\','/',$dirName));
         if (self::$arrConfig['IS_CLI'] && !is_file($fileName)){
             $dirName = realpath(pathinfo($fileName)['dirname']);
             $fileName = $dirName.DS.pathinfo($fileName)['basename'];

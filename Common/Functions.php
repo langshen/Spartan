@@ -527,6 +527,28 @@ function getFloor($v,$n=2){
     return bcdiv(floor((string)($v*pow(10,$n))),pow(10,$n),$n);
 }
 
+/**
+ * 生成一个随机数
+ * @return mixed
+ */
 function rnd(){
     return microtime(true);
+}
+
+/**
+ * 设置扩展加载目录
+ * @param $class string 根空间名
+ * @param $path string 根目录
+ * @param string $ext 类后缀名
+ * @param array $include 主动包含的文件
+ */
+function setExtend($class,$path,$ext='.php',$include=[]){
+    $path = str_replace(['\\','/'],[DS,DS],$path);
+    config('EXTEND.'.$class,['path'=>$path,'ext'=>$ext]);
+    $path = \Spt::$arrConfig['APP_EXTEND'] . $path . DS;
+    $include[] = 'functions.php';$include[] = 'function.php';
+    foreach($include as $file){
+        print_r($path . $file."\r\n");
+        is_file($path . $file) && include_once( $path . $file );
+    }
 }

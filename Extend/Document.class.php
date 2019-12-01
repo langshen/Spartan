@@ -63,7 +63,7 @@ class Document {
      * @param $ext
      * @return array 返回所有已经加载的文件类名
      */
-    private function loadDirFile($strDir,$ext = CLASS_EXT){
+    private function loadDirFile($strDir,$ext = '.class.php'){
         $arrDir = is_array($strDir)?$strDir:explode(',',$strDir);
         $intExtLen = strlen($ext);
         $arrFilesName = $arrNextPath = [];

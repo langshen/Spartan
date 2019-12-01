@@ -342,7 +342,7 @@ class DbTable {
      */
     private function loadTableModel($strDir,&$arrFileName = []){
         $arrDir = is_array($strDir)?$strDir:explode(',',$strDir);
-        $intExtLen = strlen(CLASS_EXT);
+        $intExtLen = strlen(\Spt::$arrConfig['CLASS_EXT']);
         $arrNextPath = [];
         foreach($arrDir as $dir){
             $arrCore = new \RecursiveDirectoryIterator(rtrim(str_replace(['\\','/'],[DS,DS],$dir),DS).DS);
@@ -351,7 +351,7 @@ class DbTable {
                 if ($objFile->isDir()){
                     !in_array($objFile->getFilename(),['.','..']) && $arrNextPath[] = $strFile;
                 }else{
-                    if (substr($strFile,0 - $intExtLen) == CLASS_EXT){
+                    if (substr($strFile,0 - $intExtLen) == \Spt::$arrConfig['CLASS_EXT']){
                         $strFile = trim(explode(APP_ROOT,strstr($strFile,'.',true))[1],DS.'.');
                         $arrTemp = explode(DS,$strFile);
                         if ($arrTemp[0].'\\'.$arrTemp[1] != $this->config['name_space']){

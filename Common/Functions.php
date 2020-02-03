@@ -363,6 +363,7 @@ function validate(array $rules = [], array $message = [], array $field = [])
 
 /**
  * @param $arrData
+ * @param $errInfo
  * @return mixed
  */
 function valid(&$arrData,&$errInfo = ''){
@@ -422,8 +423,8 @@ function isUserName($strUserName){
  * @return mixed
  */
 function toUpperNumber($number){
-    $cnynums = array("〇","一","二","三","四","五","六","七","八","九");
-    return str_replace(array_keys($cnynums),$cnynums,$number);
+    $cnyNum = array("〇","一","二","三","四","五","六","七","八","九");
+    return str_replace(array_keys($cnyNum),$cnyNum,$number);
 }
 /**
  * 金额转中文大写
@@ -432,14 +433,14 @@ function toUpperNumber($number){
  */
 function toChineseNumber($money){
     $money = number_format(round($money,2),2,'.','');
-    $cnynums = array("零","壹","贰","叁","肆","伍","陆","柒","捌","玖");
-    $cnyunits = array("圆","角","分");
-    $cnygrees = array("拾","佰","仟","万","拾","佰","仟","亿");
+    $cnyNum = array("零","壹","贰","叁","肆","伍","陆","柒","捌","玖");
+    $cnyUnits = array("圆","角","分");
+    $cnyGrees = array("拾","佰","仟","万","拾","佰","仟","亿");
     list($int,$dec) = explode(".",$money,2);
     $dec = array_filter(array($dec[1],$dec[0]));
-    $ret = array_merge($dec,array(implode("",cnyMapUnit(str_split($int),$cnygrees)),""));
-    $ret = implode("",array_reverse(cnyMapUnit($ret,$cnyunits)));
-    return str_replace(array_keys($cnynums),$cnynums,$ret);
+    $ret = array_merge($dec,array(implode("",cnyMapUnit(str_split($int),$cnyGrees)),""));
+    $ret = implode("",array_reverse(cnyMapUnit($ret,$cnyUnits)));
+    return str_replace(array_keys($cnyNum),$cnyNum,$ret);
 }
 
 /**
@@ -480,7 +481,8 @@ function getRedisToSessionHandler(){
 
 /**
  * 返回一个已连接的Redis实例
- * @return Redis|void|mixed
+ * @param $bloCoroutine
+ * @return Redis|mixed
  */
 function redis($bloCoroutine=false){
     $arrConfig = getRedisToSessionHandler();

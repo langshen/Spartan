@@ -11,6 +11,8 @@ class Controller{
     protected $request;
     /** @var \Spartan\Lib\Response */
     protected $response;
+    /** @var string 模版，Web为PC端，Mobile为手机端,默认为不分端 */
+    protected $tplName = '';
 
     public function __construct($_arrConfig = []){
         $this->request = Request::instance($_arrConfig);
@@ -35,8 +37,10 @@ class Controller{
      * @param  array  $config   模板参数
      * @return mixed
      */
-    protected function fetch($template = '', $vars = [], $config = [])
-    {
+    protected function fetch($template = '', $vars = [], $config = []){
+        if (!$template && $this->tplName){
+            $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.\Spt::$arrConfig['ACTION'];
+        }
         return $this->view->fetch($template, $vars, $config);
     }
 

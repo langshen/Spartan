@@ -425,7 +425,7 @@ class Spt {
         sort(self::$arrError);
         foreach (self::$arrError as $v){
             !$error['message'] && $error['message'] = $v['message'];
-            $arrException[] = $v['message'] . '<br>' . $v['file'] . '<br>' . 'code:'.$v['code'].',line:'.$v['line'];
+            $arrException[] = $v['message'] . '<br>' . $v['file'] . '<br>'.'line:'.$v['line'] . ',code:'.$v['code'];
         }
         self::$arrError = [];
         if (self::$arrConfig['IS_CLI']){//调试模式下输出错误信息

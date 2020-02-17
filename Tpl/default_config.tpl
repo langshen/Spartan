@@ -151,19 +151,22 @@ function uploadPath($path=''){
     return attachPath($path);
 }
 function wwwUrl(){
-    return 'http://www.'.request()->rootDomain();
+    return request()->scheme().'://www.'.request()->rootDomain();
 }
 function staticUrl(){
     return '/public/';
 }
 function attachUrl($path=''){
-    return 'http://www.'.request()->rootDomain().'/attach/'.trim($path,'/');
+    return request()->scheme().'://www.'.request()->rootDomain().'/attach/'.trim($path,'/');
 }
 function apiUrl(){
-    return 'http://api.'.request()->rootDomain();
+    return request()->scheme().'://api.'.request()->rootDomain();
 }
 function adminUrl(){
-    return 'http://www.'.request()->rootDomain().'/admin';
+    return request()->scheme().'://www.'.request()->rootDomain().'/admin';
+}
+function domainUrl(){
+    return request()->rootDomain();
 }
 {Config}
 <?php

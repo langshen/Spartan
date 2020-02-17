@@ -173,8 +173,8 @@ class Model {
      * @param string $name
      * @return array|mixed|string
      */
-    public function getConfig($name = ''){
-        return !$name?$this->arrConfig:(isset($this->arrConfig[$name])?$this->arrConfig[$name]:'');
+    public function getConfig($name = '',$default = ''){
+        return !$name?$this->arrConfig:(isset($this->arrConfig[$name])?$this->arrConfig[$name]:$default);
     }
 
     /**

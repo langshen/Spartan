@@ -233,6 +233,8 @@ class Curl{
 		$this->headersOut = curl_getinfo($this->curlHandle,CURLINFO_HEADER_OUT);
 		if(stripos($this->headers,'charset=GBK')!==false){
             $this->content = iconv('GBK','utf-8//IGNORE',$this->content);
+        }elseif(stripos($this->headers,'charset=gb2312')!==false){
+            $this->content = iconv('gb2312','utf-8//IGNORE',$this->content);
         }
         if ($this->openCookie){
             preg_match_all("/set\-cookie:([^\r\n]*)/i", $this->headers, $matches);

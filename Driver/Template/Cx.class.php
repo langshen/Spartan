@@ -349,17 +349,18 @@ class Cx extends TagLib
                 break;
         }
         $type = $this->parseCondition(' ' . $type . ' ');
+        $strSet = stripos($name,')') != false?'':'isset('.$name.') && ';
         if (stripos($value,'||') > 0 || stripos($value,'&&') > 0){
             $arrTemp = explode(stripos($value,'||') > 0?'||':'&&',trim($value,"'"));
             $parseStr = '<?php if(';
             foreach ($arrTemp as &$vv){
-                $vv = '(isset('.$name.') && '.$name.' '.$type.' \''.$vv.'\')';
+                $vv = '('.$strSet.$name.' '.$type.' \''.$vv.'\')';
             }
             unset($vv);
             $parseStr .= implode($arrTemp,stripos($value,'||') > 0?' || ':' && ');
             $parseStr .= '): ?>'.$content.'<?php endif; ?>';
         }else{
-            $parseStr = '<?php if(isset('.$name.') && '.$name.' '.$type.' '.$value.'): ?>'.$content.'<?php endif; ?>';
+            $parseStr = '<?php if('.$strSet.$name.' '.$type.' '.$value.'): ?>'.$content.'<?php endif; ?>';
         }
         return $parseStr;
     }
@@ -452,7 +453,7 @@ class Cx extends TagLib
     {
         $name     = $tag['name'];
         $name     = $this->autoBuildVar($name);
-        $parseStr = '<?php if(empty(' . $name . ') || ((' . $name . ' instanceof \think\Collection || ' . $name . ' instanceof \think\Paginator ) && ' . $name . '->isEmpty())): ?>' . $content . '<?php endif; ?>';
+        $parseStr = '<?php if(empty(' . $name . ')): ?>' . $content . '<?php endif; ?>';
 
         return $parseStr;
     }
@@ -470,7 +471,7 @@ class Cx extends TagLib
     {
         $name     = $tag['name'];
         $name     = $this->autoBuildVar($name);
-        $parseStr = '<?php if(!(empty(' . $name . ') || ((' . $name . ' instanceof \think\Collection || ' . $name . ' instanceof \think\Paginator ) && ' . $name . '->isEmpty()))): ?>' . $content . '<?php endif; ?>';
+        $parseStr = '<?php if(!(empty(' . $name . '))): ?>' . $content . '<?php endif; ?>';
 
         return $parseStr;
     }

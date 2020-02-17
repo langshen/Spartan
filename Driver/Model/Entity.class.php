@@ -149,7 +149,7 @@ class Entity extends Model
     public function delete($options = []){
         $bolArray = $this->getConfig('array');
         if (isset($options['where']['id'])){
-            if (stripos($options['where']['id'],',')){
+            if (!is_array($options['where']['id']) && stripos($options['where']['id'],',')){
                 $options['where']['id'] = explode(',',$options['where']['id']);
             }
             if (is_array($options['where']['id'])){//如果是个数据

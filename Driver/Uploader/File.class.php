@@ -284,13 +284,14 @@ class File extends SplFileObject
     public function checkImg()
     {
         $extension = strtolower(pathinfo($this->getInfo('name'), PATHINFO_EXTENSION));
-
         /* 对图像文件进行严格检测 */
-        if (in_array($extension, ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'swf']) && !in_array($this->getImageType($this->filename), [1, 2, 3, 4, 6, 13])) {
+        if (!in_array($extension, ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'swf'])) {
+            $this->error = 'illegal image files';
+            return false;
+        }elseif (!in_array($this->getImageType($this->filename), [1, 2, 3, 4, 6, 13])){
             $this->error = 'illegal image files';
             return false;
         }
-
         return true;
     }
 

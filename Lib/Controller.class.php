@@ -40,6 +40,8 @@ class Controller{
     protected function fetch($template = '', $vars = [], $config = []){
         if (!$template && $this->tplName){
             $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.\Spt::$arrConfig['ACTION'];
+        }elseif ($this->tplName && stripos($template,'@') === false){
+            $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.$template;
         }
         return $this->view->fetch($template, $vars, $config);
     }
@@ -302,6 +304,19 @@ class Controller{
         }
         unset($minxData);
         return $this->api($strMsg,$intCode,$arrData);
+    }
+
+    /**
+     * @param $data
+     * 返回可执行的js脚本
+     * @return mixed
+     */
+    protected function toJs($data){
+        header('Content-Type:text/html; charset=utf-8');
+        echo '<script language="javascript">';
+        echo $data;
+        exit('</script>');
+        return;
     }
 
     /**

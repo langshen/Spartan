@@ -159,9 +159,11 @@ class Cookie
      */
     public function get($name = '', $prefix = null)
     {
+        $arrKeyName = explode('.', $name);
+        !$arrKeyName && $arrKeyName = [''];
+        $strKeyName = array_shift($arrKeyName);
         $prefix = !is_null($prefix) ? $prefix : $this->config['prefix'];
         $key    = $prefix . $name;
-
         if ('' == $name) {
             if ($prefix) {
                 $value = [];
@@ -173,13 +175,22 @@ class Cookie
             } else {
                 $value = $_COOKIE;
             }
-        } elseif (isset($_COOKIE[$key])) {
-            $value = $_COOKIE[$key];
-
+        } elseif (isset($_COOKIE[$strKeyName])) {
+            $value = $_COOKIE[$strKeyName]??'';
             if (0 === strpos($value, 'spt:')) {
                 $value = substr($value, 4);
                 $value = json_decode($value, true);
                 array_walk_recursive($value, [$this, 'jsonFormatProtect'], 'decode');
+                if ($arrKeyName && is_array($value)){
+                    foreach ($arrKeyName as $val) {
+                        if (isset($value[$val])) {
+                            $value = $value[$val];
+                        } else {
+                            $value = null;
+                            break;
+                        }
+                    }
+                }
             }
         } else {
             $value = null;

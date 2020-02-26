@@ -359,7 +359,7 @@ class Response
     {
         if (null == $this->content) {
             $content = $this->output($this->data);
-
+            is_array($content) && $content = json_encode($content,256);
             if (null !== $content && !is_string($content) && !is_numeric($content) && !is_callable([
                 $content,
                 '__toString',

@@ -7,15 +7,12 @@ class Controller{
 
     /** @var \Spartan\Lib\View */
     protected $view;
-    /** @var \Spartan\Lib\Request */
-    protected $request;
     /** @var \Spartan\Lib\Response */
     protected $response;
     /** @var string 模版，Web为PC端，Mobile为手机端,默认为不分端 */
     protected $tplName = '';
 
     public function __construct($_arrConfig = []){
-        $this->request = Request::instance($_arrConfig);
         $this->response = Response::instance($_arrConfig);
         $this->view    = View::instance($_arrConfig);
         $this->view->init();
@@ -29,6 +26,9 @@ class Controller{
         return $this->display('hello, 404啦~，'.config('URL').' 未能显示。');
     }
 
+    public function request($name,$default){
+        return request()->param($name,$default);
+    }
     /**
      * 加载模板输出
      * @access protected
@@ -152,7 +152,7 @@ class Controller{
             'url'  => $url,
             'wait' => $wait,
         ];
-        $type = $this->request->isAjax()?'json':'html';
+        $type = request()->isAjax()?'json':'html';
         // 把跳转模板的渲染下沉，这样在 response_send 行为里通过getData()获得的数据是一致性的格式
         if ('html' == strtolower($type)) {
             $type = 'jump';
@@ -175,9 +175,9 @@ class Controller{
      */
     protected function error($msg = '', $url = null, $data = '', $wait = 3, array $header = [])
     {
-        $type = $this->request->isAjax()?'json':'html';
+        $type = request()->isAjax()?'json':'html';
         if (is_null($url)) {
-            $url = $this->request->isAjax() ? '' : 'javascript:history.back(-1);';
+            $url = request()->isAjax() ? '' : 'javascript:history.back(-1);';
         }
         $result = [
             config('GET.API.CODE','code') => 0,

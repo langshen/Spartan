@@ -39,7 +39,7 @@ class Controller{
      */
     protected function fetch($template = '', $vars = [], $config = []){
         if (!$template && $this->tplName){
-            $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.\Spt::$arrConfig['ACTION'];
+            $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.strtolower(\Spt::$arrConfig['ACTION']);
         }elseif ($this->tplName && stripos($template,'@') === false){
             $template = $this->tplName.'@'.\Spt::$arrConfig['CONTROL'].'@'.$template;
         }

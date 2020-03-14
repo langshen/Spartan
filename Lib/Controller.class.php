@@ -308,13 +308,18 @@ class Controller{
 
     /**
      * @param $data
+     * @param $fun
      * 返回可执行的js脚本
      * @return mixed
      */
-    protected function toJs($data){
+    protected function toJs($data,$fun=''){
         header('Content-Type:text/html; charset=utf-8');
         echo '<script language="javascript">';
-        echo $data;
+        if ($fun){
+            echo $fun.'("'.str_replace('"','\"',$data).'");';
+        }else{
+            echo $data;
+        }
         exit('</script>');
         return;
     }

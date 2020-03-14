@@ -498,12 +498,11 @@ function redis($bloCoroutine=false){
     $status = $redis->connect($arrConfig['host'],$arrConfig['port']);
     if (isset($arrConfig['query']) && $arrConfig['query']){
         if (!$redis->auth($arrConfig['query'])){
-            \Spt::halt('Redis验证失败：'.json_encode($arrConfig));
+            \Spt::halt('Redis Validation failed:'.json_encode($arrConfig));
         }
     }
     if(!$status){
-        print_r($arrConfig);
-        \Spt::halt('Redis连接失败：'.json_encode($arrConfig));
+        \Spt::halt('Redis connection failed:'.json_encode($arrConfig));
     }
     return $redis;
 }

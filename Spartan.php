@@ -562,7 +562,7 @@ class Spt {
         $result = $objModule->{$strAction}();//执行对应控制器的方法，并把预想的原型方法传入。
         if ($result instanceof Spartan\Lib\Response){
             $result->send();
-        }elseif ($result){
+        }elseif ($result && !($result instanceof Spartan\Lib\Image)){
             Spartan\Lib\Response::create($result)->send();
         }
     }

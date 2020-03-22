@@ -191,7 +191,7 @@ class Controller{
         }
         $this->response->create($result, $type)
             ->header($header)
-            ->options(['jump_template' => FRAME_PATH.'Tpl/dispatch_jump.tpl'])->send();
+            ->options(['jump_template' => config('GET.JUMP_TPL',FRAME_PATH.'Tpl/dispatch_jump.tpl')])->send();
         exit(0);
     }
 

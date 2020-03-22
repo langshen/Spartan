@@ -210,7 +210,15 @@ class Spt {
         if (is_array($name)){
             $name = array_change_key_case($name,CASE_UPPER);
             foreach($name as $k=>$v){
-                self::$arrConfig[$k] = isset(self::$arrConfig[$k])?array_merge(self::$arrConfig[$k],$v):$v;
+                if (isset(self::$arrConfig[$k])){
+                    if (is_array(self::$arrConfig[$k]) && is_array($v)){
+                        self::$arrConfig[$k] = array_merge(self::$arrConfig[$k],$v);
+                    }else{
+                        self::$arrConfig[$k] = $v;
+                    }
+                }else{
+                    self::$arrConfig[$k] = $v;
+                }
             }
         }else{
             $arrName = explode('.',$name);

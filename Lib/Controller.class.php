@@ -185,6 +185,7 @@ class Controller{
             config('GET.API.DATA','data') => $data,
             'url'  => $url,
             'wait' => $wait,
+            'title' => $msg?$msg:'操作异常'
         ];
         if ('html' == strtolower($type)) {
             $type = 'jump';

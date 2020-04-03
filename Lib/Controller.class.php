@@ -26,7 +26,7 @@ class Controller{
         return $this->display('hello, 404啦~，'.config('URL').' 未能显示。');
     }
 
-    public function request($name,$default){
+    public function request($name,$default=''){
         return request()->param($name,$default);
     }
     /**

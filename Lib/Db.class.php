@@ -564,7 +564,12 @@ class Db{
      */
     private function parseTable($tables) {
         if(is_array($tables)) {//支持别名定义
-	        $tables = $this->parseTrueTable($tables[0]).' '.$tables[1];
+            $tables[1] = $tables[1]??'';
+            if ($tables[1] == 'exp_table'){
+                $tables = "({$tables[0]}) as exp_table";
+            }else{
+                $tables = $this->parseTrueTable($tables[0]).' '.$tables[1];
+            }
         }elseif(is_string($tables)){
 	        $tables = $this->parseTrueTable($tables);
         }
@@ -845,9 +850,9 @@ class Db{
         if(empty($union)){
             return '';
         }
-        if(isset($union['_all'])) {
+        if(isset($union['union_all'])) {
             $str = 'UNION ALL ';
-            unset($union['_all']);
+            unset($union['union_all']);
         }else{
             $str = 'UNION ';
         }
@@ -886,7 +891,7 @@ class Db{
      * @param array $options 表达式
      * @return string
      */
-    private function parseSql($options = []){
+    public function parseSql($options = []){
         return str_replace(
             ['%TABLE%','%DISTINCT%','%FIELD%','%JOIN%','%WHERE%','%GROUP%','%HAVING%','%ORDER%','%LIMIT%','%UNION%','%COMMENT%'],
             [

@@ -1169,7 +1169,7 @@ class Validate
         }
 
         // 指定长度
-        return $length == $rule;
+        return $length >= $rule;
     }
 
     /**

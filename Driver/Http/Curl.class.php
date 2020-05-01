@@ -200,7 +200,7 @@ class Curl{
 			if($postFields){
 			    if (is_array($postFields)){
 			        if ($postType == 'JSON'){
-                        $postFields = json_encode($postFields);
+                        $postFields = json_encode($postFields,256 + 64);
                     }else{
                         $postFields = $this->toUrl($postFields);
                     }
@@ -254,6 +254,30 @@ class Curl{
 	}
 
     /**
+     * 下载一个文件
+     * @param $url
+     * @param $file
+     * @return bool
+     */
+	public function download($url,$file){
+        if (!$this->checkPath(dirname($file))) {
+            return false;
+        }
+        curl_setopt($this->curlHandle, CURLOPT_POST, false);
+        if (stripos($url,'https://')===0){
+            curl_setopt($this->curlHandle,CURLOPT_SSL_VERIFYPEER, false); //不验证证书下同
+            curl_setopt($this->curlHandle,CURLOPT_SSL_VERIFYHOST, false); //
+        }
+        curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, array_unique($this->arrHeader));
+        curl_setopt($this->curlHandle,CURLOPT_URL,$url);
+        $data = curl_exec($this->curlHandle);
+        if (curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE) == '200') {
+            $body = substr($data, curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE));
+            return file_put_contents($file,$body);
+        }
+	    return false;
+    }
+    /**
      * @param $arrPost
      * @return string
      */
@@ -288,4 +312,20 @@ class Curl{
 		$this->close();
 		$this->curlHandle = null;
 	}
+
+    /**
+     * 检查目录是否可写
+     * @access protected
+     * @param  string   $path    目录
+     * @return boolean
+     */
+    protected function checkPath($path){
+        if (is_dir($path)) {
+            return true;
+        }
+        if (mkdir($path, 0755, true)) {
+            return true;
+        }
+        return false;
+    }
 }

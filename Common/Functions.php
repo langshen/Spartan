@@ -364,10 +364,14 @@ function validate(array $rules = [], array $message = [], array $field = [])
 /**
  * @param $arrData
  * @param $errInfo
+ * @param $arrParam
  * @return mixed
  */
-function valid(&$arrData,&$errInfo = ''){
+function valid(&$arrData,&$errInfo = '',$arrParam = []){
     $rules = $message = $field = $data = [];
+    if ($arrParam && is_array($arrParam)){
+        request()->withParam($arrParam);
+    }
     foreach ($arrData as $k=>$v){
         if (stripos($k,'.')>0){
             list($method,$k) = explode('.',$k);

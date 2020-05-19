@@ -119,6 +119,7 @@ class Db{
      */
     public function insert($table,$data,$options = []) {
         $values = $fields = [];
+        !is_array($options) && $options = [];
         $options['table'] = $table;
         $replace = isset($options['replace'])?$options['replace']:false;//是否replace
         foreach ($data as $key=>$val){

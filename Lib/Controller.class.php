@@ -16,6 +16,9 @@ class Controller{
         $this->response = Response::instance($_arrConfig);
         $this->view    = View::instance($_arrConfig);
         $this->view->init();
+        $this->assign('curControl',strtolower(getUrl(0,'index')));
+        $this->assign('curAction',strtolower(getUrl(1,'index')));
+        $this->assign('curUrl',strtolower(getUrl(0,'index').'.'.getUrl(1,'index')));
     }
 
     /**

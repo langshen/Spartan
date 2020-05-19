@@ -183,6 +183,7 @@ class Entity extends Model
     public function update($arrData = [], $options = []){
         $bolArray = $this->getConfig('array');
         $bolUpdate = false;
+        !is_array($options) && $options = [];
         //主键中的自增字段不允许在data里。
         $strPrimary = '';//自增主键名
         $arrPrimary = [];//主键数组
@@ -226,7 +227,9 @@ class Entity extends Model
             }
         }else{
             $bolUpdate = false;
-            unset($options['where']);
+            if (is_array($options) && isset($options['where'])){
+                unset($options['where']);
+            }
         }
         if (!$bolUpdate || $this->getConfig('action') == 'insert'){
             if ($this->getConfig('action') == 'insert' && isset($options['where']) && is_array($options['where'])){

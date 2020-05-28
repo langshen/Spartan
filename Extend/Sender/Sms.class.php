@@ -21,9 +21,8 @@ class Sms implements SmsSender {
         !isset($_arrConfig['PORT']) && $_arrConfig['PORT'] = 80;
         !isset($_arrConfig['INTERVAL']) && $_arrConfig['INTERVAL'] = 3;
         !isset($_arrConfig['CHARSET']) && $_arrConfig['CHARSET'] = 'utf-8';
-        !isset($_arrConfig['DEBUG']) && $_arrConfig['DEBUG'] = true;
         !isset($_arrConfig['ACTION']) && $_arrConfig['ACTION'] = '';//发送动作
-        $this->arrConfig = $_arrConfig;
+        $this->arrConfig = array_merge($this->arrConfig,$_arrConfig);
         $this->callBack = $this->getCallBack();
         $this->clsHttp = \Spt::getInstance('Spartan\\Driver\\Http\\Curl');
     }
@@ -98,10 +97,6 @@ class Sms implements SmsSender {
 		}
         foreach ($this->arrMobile as $key=>$mobile) {
             unset($this->arrMobile[$key]);
-		    if ($this->arrConfig['DEBUG'] == true){
-                $this->arrResult[$mobile] = Array(true,'测试发送成功');
-                return Array('测试发送成功',1);
-            }
             $strMessageInfo = $this->clsHttp->send(
                 $this->arrConfig['PROTOCOL'].$this->arrConfig['SERVER'].':'.$this->arrConfig['PORT'].$this->arrConfig['ACTION'],
                 $this->getSendInfo($mobile),
@@ -131,6 +126,8 @@ class Sms implements SmsSender {
                 "&PWD=".
                 strtoupper(md5($this->arrConfig['USER_NAME'].$this->arrConfig['PASS_WORD'])).
                 "&Mobile={$mobile}&Content=".$this->body.'&ext=&stime=&rrid=',
+            '139.196.227.19'=>"action=send&userid=503&account=sxq2018&password=9999asdf&mobile=".
+                $mobile."&content=".urlencode($this->body).""
         );
         return isset($arrBody[$this->arrConfig['SERVER']])?$arrBody[$this->arrConfig['SERVER']]:'';
     }
@@ -146,6 +143,9 @@ class Sms implements SmsSender {
                 preg_match($strPreg, $body,$matches);
                 $body = isset($matches[1])?$matches[1]:0;
                 return stripos($body,'-')===false && $body > 0?1:0;
+            },
+            '139.196.227.19'=>function($body){
+                return stripos($body,'<message>ok</message>')===false?0:1;
             }
         );
 	    return isset($arrFunction[$this->arrConfig['SERVER']])?$arrFunction[$this->arrConfig['SERVER']]:null;

@@ -22,7 +22,7 @@ class Sender {
      * @param array $_arrConfig
      */
 	public function __construct($_arrConfig = []){
-        $this->arrConfig = $_arrConfig;
+        $this->arrConfig = array_merge($this->arrConfig,$_arrConfig);
         if (isset($_arrConfig['type']) && in_array($_arrConfig['type'],['sms','email'])){
             $this->{$this->arrConfig['type']}($_arrConfig);
         }
@@ -38,6 +38,7 @@ class Sender {
         $tmpConfig = config('SMS');
         !is_array($tmpConfig) && $tmpConfig = [];
         $arrConfig = array_merge($this->arrConfig,$tmpConfig,$arrConfig);
+        $arrConfig['SENDER'] = $arrConfig['SENDER']??'Sms';
         $this->arrInstance['sms'] = \Spt::getInstance('Spartan\\Extend\\Sender\\'.$arrConfig['SENDER'],$arrConfig);
         return $this;
     }
@@ -52,6 +53,7 @@ class Sender {
         $tmpConfig = config('EMAIL');
         !is_array($tmpConfig) && $tmpConfig = [];
         $arrConfig = array_merge($this->arrConfig,$tmpConfig,$arrConfig);
+        $arrConfig['SENDER'] = $arrConfig['SENDER']??'Mailer';
         $this->arrInstance['email'] = \Spt::getInstance('Spartan\\Extend\\Sender\\'.$arrConfig['SENDER'],$arrConfig);
         return $this;
     }

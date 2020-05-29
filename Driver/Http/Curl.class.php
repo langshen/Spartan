@@ -198,7 +198,7 @@ class Curl{
 		if($method == 'POST' || $method == 'DELETE'){
             curl_setopt($this->curlHandle, CURLOPT_CUSTOMREQUEST,strtoupper($method));
 			if($postFields){
-			    if (is_array($postFields)){
+			    if (is_array($postFields) && $postType != 'FILE'){
 			        if ($postType == 'JSON'){
                         $postFields = json_encode($postFields,256 + 64);
                     }else{
@@ -210,6 +210,8 @@ class Curl{
             if ($postType == 'JSON'){
                 curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
                 $this->setHeader('Content-Type: application/json; charset=utf-8');
+            }elseif ($postType == 'FILE'){
+                curl_setopt($this->curlHandle, CURLOPT_SAFE_UPLOAD, true);
             }
 		}else{
 			curl_setopt($this->curlHandle, CURLOPT_POST, false);

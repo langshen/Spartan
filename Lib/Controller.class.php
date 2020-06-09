@@ -121,6 +121,19 @@ class Controller{
     }
 
     /**
+     * 返回一个数据的ID
+     * @param $name
+     * @return array|string
+     */
+    public function getMulId($name){
+        $strId = trim(str_ireplace(' ','',$this->request($name,'')));
+        if(!is_numeric(str_ireplace(',','',$strId))){
+            return [];
+        }
+        return explode(',',$strId);
+    }
+    
+    /**
      * 模板变量赋值
      * @access protected
      * @param  mixed $name  要显示的模板变量

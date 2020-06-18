@@ -104,7 +104,7 @@
                 <tr>
                     <td><select name="condition[{$vo.name}]">
                             <option value="1" {eq name="vo.condition" value="1"}selected{/eq}>可查</option>
-                            <option value="0">不可</option>
+                            <option value="0" {neq name="vo.condition" value="1"}selected{/neq}>不可</option>
                         </select></td>
                     <td><select name="require[{$vo.name}]">
                             <option value="null" {eq name="vo.require.0.0" value="null"}selected{/eq}>可为空</option>

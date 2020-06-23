@@ -15,15 +15,20 @@ class WxPayment extends LogicPayment
     );
 
     public function __construct($_arrConfig = []){
-        $arrConfig = config('WX_PAYMENT');
+        $arrConfig = config('get.WX_PAYMENT',[]);
         $this->arrConfig = array_merge($this->arrConfig,$arrConfig,$_arrConfig);
     }
 
     //创立一个签名
-    private function makeSign($arrParams){
+    private function makeSign($arrParams,$type='md5'){
         $strSign = $this->getSignContentData($arrParams,'wxpay');//得到需要签名的URL字符串
         $strSign .= "&key=".$this->arrConfig['APP_KEY'];
-        return strtoupper(md5($strSign));
+        if($type == 'md5'){
+            $string = md5($strSign);
+        } else {
+            $string = hash_hmac("sha256",$strSign ,$this->arrConfig['APP_KEY']);
+        }
+        return strtoupper($string);
     }
 
     //通过错误码显示具体的错误信息
@@ -84,14 +89,14 @@ class WxPayment extends LogicPayment
     }
 
     //得到回传信息，验证签名
-    public function checkSign($strXml){
+    public function checkSign($strXml,$type='md5'){
         $arrData = $this->formXml($strXml);
         $strSign = isset($arrData['sign'])?$arrData['sign']:'';
         unset($arrData['sign']);
         if (!$strSign){
             return Array('验证丢失。',0);
         }
-        if ($strSign != $this->makeSign($arrData)){
+        if ($strSign != $this->makeSign($arrData,$type)){
             return Array('验签失败。',0);
         }
         return Array('成功',1,$arrData);

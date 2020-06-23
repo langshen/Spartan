@@ -622,16 +622,16 @@ class Db{
                 if(strpos($k,'|')) {//支持 name|title|nickname 方式定义查询字段
                     $arrTempKey = explode('|',$k);
                     $arrTempStr = Array();
-                    foreach ($arrTempKey as $kk=>$vv){//name|title|nickname 每个都是字段key
-                        $strValue =  $bolMulti?$v[$kk]:$v;
+                    foreach ($arrTempKey as $vv){//name|title|nickname 每个都是字段key
+                        $strValue =  $bolMulti?$v[$vv]:$v;
                         $arrTempStr[] = '('.$this->parseWhereItem($this->parseKey($vv),$strValue).')';
                     }
                     $strWhere .= implode(' OR ',$arrTempStr);
                 }elseif(strpos($k,'&')){//支持 name&&title&&nickname 方式定义查询字段
                     $arrTempKey = explode('&',$k);
                     $arrTempStr = Array();
-                    foreach ($arrTempKey as $kk=>$vv){//name&title&nickname 每个都是字段key
-                        $strValue =  $bolMulti?$v[$kk]:$v;
+                    foreach ($arrTempKey as $vv){//name&title&nickname 每个都是字段key
+                        $strValue =  $bolMulti?$v[$vv]:$v;
                         $arrTempStr[] = '('.$this->parseWhereItem($this->parseKey($vv),$strValue).')';
                     }
                     $strWhere .= implode(' AND ',$arrTempStr);

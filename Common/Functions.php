@@ -33,10 +33,7 @@ function sysConfig($name = '',$default = null,$file = 'system'){
     static $arrConfig;
     if (!$arrConfig){
         $strPath = APP_ROOT.'Runtime'.DS.'Config'.DS.$file;
-        if (!is_file($strPath)){
-            return [];
-        }
-        $arrConfig = include($strPath);
+        is_file($strPath) && $arrConfig = include($strPath);
         !$arrConfig && $arrConfig = [];
     }
     if ($name === '' && $default === null){

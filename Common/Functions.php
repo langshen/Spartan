@@ -22,7 +22,40 @@ function config($name = '', $value = null)
         return \Spt::setConfig($name,$value);
     }
 }
-
+/**
+ * 得到一个系统配置量
+ * @param string $name
+ * @param null $default 默认值
+ * @param null $file 文件名
+ * @return array|mixed|null
+ */
+function sysConfig($name = '',$default = null,$file = 'system'){
+    static $arrConfig;
+    if (!$arrConfig){
+        $strPath = APP_ROOT.'Runtime'.DS.'Config'.DS.$file;
+        if (!is_file($strPath)){
+            return [];
+        }
+        $arrConfig = include($strPath);
+        !$arrConfig && $arrConfig = [];
+    }
+    if ($name === '' && $default === null){
+        return $arrConfig;
+    }
+    $arrName = explode('.',$name);
+    $name = array_shift($arrName);
+    $value = $arrConfig[$name]??null;
+    if ($value === null){
+        return $default;
+    }
+    foreach($arrName as $v){
+        $value = $value[$v]??null;
+        if ($value === null){
+            return $default;
+        }
+    }
+    return $value;
+}
 /**
  * Cookie管理
  * @param string|array  $name cookie名称，如果为数组表示进行cookie设置

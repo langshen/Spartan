@@ -324,6 +324,25 @@ class Controller{
     }
 
     /**
+     * 针对于layui的格式输出
+     * @param $arrInfo
+     * @return mixed
+     */
+    public function tableList($arrInfo){
+        $intCount = $arrInfo['count']??0;
+        unset($arrInfo['count']);
+        $arrData = [
+            'code' => 0,
+            'msg'  => 'success',
+            'time' => time(),
+            'data' => $arrInfo['data'],
+            'count'=> $intCount,
+        ];
+        isset($arrInfo['plug']) && $arrData['plug'] = $arrInfo['plug'];
+        return json($arrData,200)->send();
+    }
+
+    /**
      * @param $data
      * @param $fun
      * 返回可执行的js脚本

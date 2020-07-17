@@ -277,10 +277,12 @@ class Entity extends Model
         $searchType = request()->param('search_type');
         $searchSymbol = request()->param('search_symbol');
         $searchKey = trim(request()->param('search_key',''));
+        $searchKeySelect = trim(request()->param('search_key_select',''));
         if (stripos($searchKey,'\u') === 0){
             $searchKey = json_decode('"'.$searchKey.'"');
         }
         !in_array($searchSymbol, $arrSymbol) && $searchSymbol = 'eq';
+        (!$searchKey && $searchKeySelect) && $searchKey = $searchKeySelect;
         if ($searchType && $searchKey) {
             if ($searchSymbol == 'like'){
                 $arrSearchKey = explode(' ',$searchKey);

@@ -54,6 +54,32 @@ function sysConfig($name = '',$default = null,$file = 'system'){
     return $value;
 }
 /**
+ * 设置和保存一个系统配置量
+ * @param string $name
+ * @param null $default 默认值
+ * @param null $file 文件名
+ * @return array|mixed|null
+ */
+function sysConfigSave($name,$value,$file = 'system'){
+    $arrConfig = sysConfig('',null,$file);
+    $arrConfig[$name] = $value;
+    $strContent = '<?php'.PHP_EOL."defined('APP_NAME') or die('404 Not Found');".PHP_EOL.
+        'return Array('.PHP_EOL;
+    foreach ($arrConfig as $k=>$v){
+        $strContent .= "\t'".str_ireplace("'","",$k)."'=>'".
+            str_ireplace("'","\'",$v)."',".PHP_EOL;
+    }
+    $strContent .= ");";
+    $strPath = APP_ROOT.'Runtime'.DS.'Config';
+    if (!file_exists($strPath) && !mkdir($strPath, 0777, true)) {
+        return ['建立目标失败。',1];
+    } else if (!is_writeable($strPath)) {
+        return ['目标目录不可写。',1];
+    }
+    $result = @file_put_contents($strPath.DS.$file,$strContent);
+    return [$result?'保存成功':'保存失败',$result?0:1];
+}
+/**
  * Cookie管理
  * @param string|array  $name cookie名称，如果为数组表示进行cookie设置
  * @param mixed         $value cookie值

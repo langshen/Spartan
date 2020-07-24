@@ -6,6 +6,7 @@
 function version(){
     return Spt::$version;
 }
+
 /**
  * 获取和设置配置参数
  * @param string|array  $name 参数名
@@ -22,10 +23,11 @@ function config($name = '', $value = null)
         return \Spt::setConfig($name,$value);
     }
 }
+
 /**
  * 得到一个系统配置量
  * @param string $name
- * @param null $default 默认值
+ * @param array|null|mixed $default 默认值
  * @param null $file 文件名
  * @return array|mixed|null
  */
@@ -53,6 +55,7 @@ function sysConfig($name = '',$default = null,$file = 'system'){
     }
     return $value;
 }
+
 /**
  * 设置和保存一个系统配置量
  * @param string $name
@@ -79,6 +82,7 @@ function sysConfigSave($name,$value,$file = 'system'){
     $result = @file_put_contents($strPath.DS.$file,$strContent);
     return [$result?'保存成功':'保存失败',$result?0:1];
 }
+
 /**
  * Cookie管理
  * @param string|array  $name cookie名称，如果为数组表示进行cookie设置

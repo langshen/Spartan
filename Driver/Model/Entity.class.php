@@ -235,6 +235,9 @@ class Entity extends Model
             if ($this->getConfig('action') == 'insert' && isset($options['where']) && is_array($options['where'])){
                 $arrData = array_merge($arrData,$options['where']);
             }
+            foreach ($arrPrimary as $k=>$v){
+                unset($arrData[$k]);
+            }
             $result = max(0,db()->insert($this->strTable,$arrData,$options));
             $arrPrimary[$strPrimary] = $result;
         }else{

@@ -308,14 +308,19 @@ class Entity extends Model
             }elseif ($searchSymbol == 'between'){
                 if (stripos($searchKey,' ')>0){
                     list($key1,$key2) = explode(' ',$searchKey);
-                }elseif (stripos($searchKey,'-')>0){
-                    list($key1,$key2) = explode('-',$searchKey);
                 }elseif(stripos($searchKey,'，')>0){
                     list($key1,$key2) = explode('，',$searchKey);
+                }elseif(stripos($searchKey,'至')>0){
+                    list($key1,$key2) = explode('至',$searchKey);
                 }else{
                     list($key1,$key2) = explode(',',$searchKey);
                 }
-                $data['where'][$searchType] = Array($searchSymbol, $key1,$key2);
+                if (strtotime($key1) && !strtotime($key2)){
+                    $key2 = date('Y-m-d 23:59:59',strtotime($key1));
+                }elseif (strtotime($key1) && strtotime($key2) && $key1 == $key2 && stripos($key1,' ')===false){
+                    $key2 = date('Y-m-d 23:59:59',strtotime($key1));
+                }
+                $data['where'][$searchType] = Array($searchSymbol, trim($key1),trim($key2));
             }else{
                 $data['where'][$searchType] = Array($searchSymbol, $searchKey);
             }

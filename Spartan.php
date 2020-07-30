@@ -435,7 +435,6 @@ class Spt {
             !$error['message'] && $error['message'] = $v['message'];
             $arrException[] = $v['message'] . '<br>' . $v['file'] . '<br>'.'line:'.$v['line'] . ',code:'.$v['code'];
         }
-        self::$arrError = [];
         if (self::$arrConfig['IS_CLI']){//调试模式下输出错误信息
             $error['exception'] = implode(PHP_EOL,$arrException);
             unset($error['title']);
@@ -446,6 +445,7 @@ class Spt {
             $error['exception'] = '<p>' . implode('</p><p>',$arrException) . '</p>';
             include(FRAME_PATH.'Tpl'.DS.'exception.tpl');
         }
+        !self::$arrError && self::$arrError = $error['exception']??[];
         self::$arrConfig['SAVE_LOG'] && self::saveLog($error['message'],'error');
         exit(0);
     }

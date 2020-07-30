@@ -493,7 +493,7 @@ class Spt {
                 '[URL:'.self::$arrConfig['URL'].']',
                 isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI',
                 isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'CLI',
-                $_POST,
+                json_encode($_POST,320),
             )),
             "[ {$type} ] {$info}" . (self::$arrError?var_export(self::$arrError,true):''),
             ''

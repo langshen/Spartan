@@ -339,6 +339,7 @@ class Controller{
             'count'=> $intCount,
         ];
         isset($arrInfo['plug']) && $arrData['plug'] = $arrInfo['plug'];
+        isset($arrInfo['sql']) && $arrData['sql'] = $arrInfo['sql'];
         return json($arrData,200)->send();
     }
 

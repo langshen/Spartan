@@ -882,6 +882,10 @@ class Db{
             $offset = $listRows*((int)$page-1);
             $options['limit'] = $offset.','.$listRows;
         }
+        if (isset($options['custom_limit']) && $options['custom_limit']){
+            $options['limit'] = $options['custom_limit'];
+            unset($options['custom_limit']);
+        }
         $strSql = $this->parseSql($options);
         $strSql .= $this->parseLock(isset($options['lock'])?$options['lock']:false);
         return str_ireplace('@.',$this->arrConfig['PREFIX'],$strSql);

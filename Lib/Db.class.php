@@ -231,7 +231,7 @@ class Db{
             }
             unset($options['lock']);
         }
-        unset($options['page']);
+        unset($options['page'],$options['custom_limit']);
         $options['limit'] = 1;
         $options['table'] = isset($options['alias'])?Array($table,$options['alias']):$table;
         $strSql = $this->buildSelectSql($options);

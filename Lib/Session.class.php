@@ -151,9 +151,9 @@ class Session
         if (isset($config['use_lock']) && $config['use_lock']) {
             $this->lock = $config['use_lock'];
         }
-        if (($config['var_session_id']??'') && strlen($_REQUEST[$config['var_session_id']]??'')>10) {
+        if (strlen($_REQUEST[$config['var_session_id']??'']??'') > 10) {
             session_id($_REQUEST[$config['var_session_id']]);
-        } elseif (($config['id']??'') && strlen($config['id']??'') > 10) {
+        } elseif (strlen($config['id']??'') > 10) {
             session_id($config['id']);
         } elseif (strlen($_REQUEST['php_id']??'') > 10) {
             session_id($_REQUEST['php_id']);

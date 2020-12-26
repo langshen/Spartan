@@ -53,14 +53,20 @@ class Model {
      * @return mixed|Model|\stdClass
      */
     public function getModel($objClass,$strType = 'Model'){
+        !$strType && $strType = 'Model';
         if (is_object($objClass)){//是一个类
             return \Spt::setInstance(get_class($objClass),$objClass);
         }else{
-            if (stripos($objClass,'_') > 0){
-                $arrTempClass = explode('_',$objClass);
+            if (stripos($objClass,'_') > 0 || stripos($objClass,'.') > 0){
+                stripos($objClass,'_') > 0 && $arrTempClass = explode('_',$objClass);
+                stripos($objClass,'.') > 0 && $arrTempClass = explode('.',$objClass);
                 array_walk($arrTempClass,function(&$v){$v = ucfirst($v);});unset($v);
                 $strPathName = array_shift($arrTempClass);
-                $strClassName = ucfirst($strType).'\\'.$strPathName.'\\'.implode('',$arrTempClass);
+                if (stripos($objClass,'_') > 0){//如果下划线为目录分格，只拆分一层目录，
+                    $strClassName = ucfirst($strType).'\\'.$strPathName.'\\'.implode('',$arrTempClass);
+                }else{//如果.为目录分格，全部折分为目录
+                    $strClassName = ucfirst($strType).'\\'.$strPathName.'\\'.implode('\\',$arrTempClass);
+                }
             }else{
                 $strClassName = trim(str_ireplace('/','\\',$objClass),'\\');
                 if (substr($strClassName,0,strlen($strType)) != $strType){

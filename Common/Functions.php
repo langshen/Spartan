@@ -379,15 +379,16 @@ function http($_arrConfig = [])
  * 快捷实例化Model管理器
  * @param string $modelName 初始化的模型类，为空时为主类
  * @param array $arrData 初始化的数据
+ * @param array $rootModel 根目录
  * @return \Spartan\Lib\Model|mixed
  */
-function model($modelName = '',$arrData = [])
+function model($modelName = '',$arrData = [],$rootModel = 'Model')
 {
     $clsModel = \Spartan\Lib\Model::instance($arrData);
     if (!$modelName){
         return $clsModel;//返回Model管理类
     }
-    $clsModel = $clsModel->getModel($modelName);
+    $clsModel = $clsModel->getModel($modelName,$rootModel);
     if (!is_object($clsModel)){
         \Spt::halt("类名：{$modelName}不存在。");
     }
